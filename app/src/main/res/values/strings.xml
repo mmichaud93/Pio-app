@@ -1,6 +1,15 @@
 <resources>
+
     <string name="app_name">Pio</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <!--
+        Nav Bar items
+    -->
+    <string-array name="nav_bar_items">
+        <item>Map</item>
+        <item>Stats</item>
+        <item>Achievements</item>
+    </string-array>
 </resources>
