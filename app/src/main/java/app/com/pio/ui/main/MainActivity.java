@@ -103,19 +103,16 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             case 0: // profile
                 cleanActionBar();
                 break;
-            case 1: // browse
+            case 1: // map
+                cleanActionBar();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, PioMapFragment.newInstance()).commit();
+                drawerLayout.closeDrawers();
+                break;
+            case 2: // achievements
                 cleanActionBar();
                 drawerLayout.closeDrawers();
                 break;
-            case 2: // query
-                cleanActionBar();
-                drawerLayout.closeDrawers();
-                break;
-            case 3: // news
-                cleanActionBar();
-                drawerLayout.closeDrawers();
-                break;
-            case 4: // random
+            case 3: // stats
                 cleanActionBar();
                 drawerLayout.closeDrawers();
                 break;
@@ -124,7 +121,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void cleanActionBar() {
         if(getSupportActionBar()!=null) {
-            getSupportActionBar().setTitle("Wikidata Explorer");
+            getSupportActionBar().setTitle("Pio");
             getSupportActionBar().setSubtitle("");
         }
     }
