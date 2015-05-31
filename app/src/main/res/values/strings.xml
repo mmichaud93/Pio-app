@@ -3,6 +3,9 @@
     <string name="app_name">Pio</string>
 
     <string name="action_settings">Settings</string>
+    <string name="sign_in_email">Sign in with Email</string>
+    <string name="back">Back</string>
+    <string name="submit">Submit</string>
 
     <!--
         Nav Bar items

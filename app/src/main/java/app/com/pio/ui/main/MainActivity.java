@@ -1,5 +1,6 @@
 package app.com.pio.ui.main;
 
+import android.content.Intent;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -14,11 +15,15 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 import app.com.pio.R;
+import app.com.pio.ui.welcome.WelcomeFragment;
 import app.com.pio.ui.main.drawer.DrawerAdapter;
 import app.com.pio.ui.main.drawer.DrawerHeaderItem;
 import app.com.pio.ui.main.drawer.DrawerItem;
 import app.com.pio.ui.main.drawer.DrawerListItem;
 import app.com.pio.ui.map.PioMapFragment;
+import app.com.pio.utility.PrefUtil;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,
@@ -26,25 +31,50 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private String[] navBarItems;
     private ArrayList<DrawerItem> items;
-    private DrawerLayout drawerLayout;
-    private ListView drawerList;
-    private Menu menu;
+
+    @InjectView(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @InjectView(R.id.drawer_list)
+    ListView drawerList;
+    @InjectView(R.id.toolbar)
     Toolbar toolbar;
+    boolean isInLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
+        setSupportActionBar(toolbar);
 
+        if(PrefUtil.getStringPrefs(this, PrefUtil.PREFS_LOGIN_TYPE_KEY, null) == null) {
+            // we need to login
+            initLogin(savedInstanceState);
+        } else {
+            // continue with app use
+            initRegularApp(savedInstanceState);
+        }
+    }
+
+    public void initLogin(Bundle savedInstanceState) {
+        isInLogin = true;
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, PioMapFragment.newInstance())
+                    .add(R.id.container, WelcomeFragment.newInstance())
+                    .commit();
+        }
+    }
+
+    public void initRegularApp(Bundle savedInstanceState) {
+        isInLogin = false;
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, PioMapFragment.newInstance())
                     .commit();
         }
 
-        // Set the toolbar as the actionbar
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -61,9 +91,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         });
 
         navBarItems = getResources().getStringArray(R.array.nav_bar_items);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setDrawerListener(this);
-        drawerList = (ListView) findViewById(R.id.drawer_list);
 
         items = new ArrayList<DrawerItem>();
         items.add(new DrawerHeaderItem("THIS IS A HEADER"));
@@ -79,7 +107,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return !isInLogin;
     }
 
     @Override
@@ -121,7 +149,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void cleanActionBar() {
         if(getSupportActionBar()!=null) {
-            getSupportActionBar().setTitle("Pio");
+            getSupportActionBar().setTitle(getString(R.string.app_name));
             getSupportActionBar().setSubtitle("");
         }
     }
@@ -144,5 +172,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     public void onDrawerStateChanged(int newState) {
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int responseCode, Intent intent) {
+        if(isInLogin) {
+            ((WelcomeFragment)getSupportFragmentManager().getFragments().get(0)).onActivityResult(requestCode, responseCode, intent);
+        }
     }
 }
