@@ -19,6 +19,7 @@ import app.com.pio.ui.main.drawer.DrawerHeaderItem;
 import app.com.pio.ui.main.drawer.DrawerItem;
 import app.com.pio.ui.main.drawer.DrawerListItem;
 import app.com.pio.ui.map.PioMapFragment;
+import app.com.pio.ui.profile.PioProfileFragment;
 
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,
@@ -102,6 +103,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         switch(position) {
             case 0: // profile
                 cleanActionBar();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, PioProfileFragment.newInstance()).commit();
                 break;
             case 1: // map
                 cleanActionBar();
