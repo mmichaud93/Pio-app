@@ -28,4 +28,7 @@ public class WelcomePageModel {
     public void setImage(int image) {
         this.image = image;
     }
+
+
+
 }
