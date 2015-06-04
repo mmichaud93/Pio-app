@@ -95,7 +95,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         drawerLayout.setDrawerListener(this);
 
         items = new ArrayList<DrawerItem>();
-        items.add(new DrawerHeaderItem("THIS IS A HEADER"));
+        //get profile object - mock up for now
+        //newprofile model ...
+        items.add(new DrawerHeaderItem("THIS IS A HEADER","https://lh3.googleusercontent.com/-uPDbuzhFn2Y/AAAAAAAAAAI/AAAAAAAABdE/tFm-2KDRYyA/s160-c-k-no/photo.jpg" ));
         for(String s : navBarItems) {
             items.add(new DrawerListItem(s));
         }
