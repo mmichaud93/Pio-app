@@ -89,23 +89,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_margin="16dp"
-            android:text="Create Account"
+            android:text="Sign In/Create Account"
             android:textSize="24sp"
             android:textStyle="bold"/>
-        <EditText
-            android:id="@+id/welcome_email_edit_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/welcome_email_title"
-            android:layout_margin="16dp"
-            android:inputType="textPersonName"
-            android:hint="name"
-            android:ems="12"/>
         <EditText
             android:id="@+id/welcome_email_edit_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/welcome_email_edit_name"
+            android:layout_below="@+id/welcome_email_title"
             android:layout_margin="16dp"
             android:inputType="textEmailAddress"
             android:hint="email"
