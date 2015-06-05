@@ -27,13 +27,19 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
 import app.com.pio.R;
+import app.com.pio.api.PioApiController;
+import app.com.pio.api.PioApiResponse;
 import app.com.pio.models.WelcomePageModel;
 import app.com.pio.ui.main.MainActivity;
 import app.com.pio.utility.AnimUtil;
 import app.com.pio.utility.PrefUtil;
-import app.com.pio.utility.Util;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
+import static app.com.pio.utility.Util.*;
 
 /**
  * Created by mmichaud on 5/28/15.
@@ -64,8 +70,6 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     Button emailBackButton;
     @InjectView(R.id.welcome_email_submit_button)
     Button emailSubmitButton;
-    @InjectView(R.id.welcome_email_edit_name)
-    EditText emailEditName;
     @InjectView(R.id.welcome_email_edit_email)
     EditText emailEditEmail;
     @InjectView(R.id.welcome_email_edit_password)
@@ -75,6 +79,8 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     private GoogleApiClient mGoogleApiClient;
     private boolean mSignInClicked;
     private boolean mIntentInProgress;
+
+    private boolean emailIsGood = false;
 
     WelcomePagerAdapter welcomePagerAdapter;
 
@@ -125,7 +131,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                         if (signInParent.getVisibility() == View.GONE) {
                             // animate the buttons up
 
-                            signInParent.animate().translationYBy(Util.dpToPx(80, getActivity())).setDuration(1).setListener(new Animator.AnimatorListener() {
+                            signInParent.animate().translationYBy(dpToPx(80, getActivity())).setDuration(1).setListener(new Animator.AnimatorListener() {
                                 @Override
                                 public void onAnimationStart(Animator animator) {
                                     signInParent.setAlpha(0);
@@ -135,8 +141,8 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                 @Override
                                 public void onAnimationEnd(Animator animator) {
                                     signInParent.setAlpha(1);
-                                    welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(Util.dpToPx(-80, getActivity())).setDuration(animationSpeed).start();
-                                    signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(Util.dpToPx(-80, getActivity())).setDuration(animationSpeed).setListener(AnimUtil.blankAnimationListener).start();
+                                    welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(dpToPx(-80, getActivity())).setDuration(animationSpeed).start();
+                                    signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(dpToPx(-80, getActivity())).setDuration(animationSpeed).setListener(AnimUtil.blankAnimationListener).start();
                                 }
 
                                 @Override
@@ -190,28 +196,6 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
             }
         });
 
-        emailEditName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (Util.validateText(editable.toString(), Util.ValidateType.TEXT)) {
-                    emailEditName.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
-                } else {
-                    emailEditName.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
-                }
-                unlockSubmit();
-            }
-        });
-
         emailEditEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -225,10 +209,24 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
 
             @Override
             public void afterTextChanged(Editable editable) {
-                // TODO: add server-side email validation too
-                if (Util.validateText(editable.toString(), Util.ValidateType.EMAIL)) {
-                    emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
+                if (validateText(editable.toString(), ValidateType.EMAIL)) {
+                    PioApiController.userExists(editable.toString(), new Callback<PioApiResponse>() {
+                        @Override
+                        public void success(PioApiResponse pioApiResponse, Response response) {
+                            if (pioApiResponse.getMsg().equals("false")) {
+                                emailIsGood = true;
+                                emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
+                            }
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            emailIsGood = false;
+                            emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
+                        }
+                    });
                 } else {
+                    emailIsGood = false;
                     emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
                 }
                 unlockSubmit();
@@ -248,7 +246,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if(Util.validateText(editable.toString(), Util.ValidateType.PASSWORD)) {
+                if(validateText(editable.toString(), ValidateType.PASSWORD)) {
                     emailEditPassword.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
                 } else {
                     emailEditPassword.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
@@ -264,8 +262,21 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                 PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
                 PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
 
-                ((MainActivity) getActivity()).initRegularApp(null);
-                getActivity().supportInvalidateOptionsMenu();
+                PioApiController.sendNewUser(emailEditEmail.getText().toString(),
+                        emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), new Callback<PioApiResponse>() {
+                            @Override
+                            public void success(PioApiResponse pioApiResponse, Response response) {
+                                if(pioApiResponse.getCode()==200) {
+                                    ((MainActivity) getActivity()).initRegularApp(null);
+                                    getActivity().supportInvalidateOptionsMenu();
+                                }
+                            }
+
+                            @Override
+                            public void failure(RetrofitError error) {
+
+                            }
+                        });
             }
         });
 
@@ -410,11 +421,11 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
 
     private void unlockSubmit() {
 
-        emailSubmitButton.setEnabled(Util.validateText(emailEditName.getText().toString(), Util.ValidateType.TEXT) &&
-                Util.validateText(emailEditEmail.getText().toString(), Util.ValidateType.EMAIL) &&
-                Util.validateText(emailEditPassword.getText().toString(), Util.ValidateType.PASSWORD));
-        emailSubmitButton.setTextColor(((Util.validateText(emailEditName.getText().toString(), Util.ValidateType.TEXT) &&
-                Util.validateText(emailEditEmail.getText().toString(), Util.ValidateType.EMAIL) &&
-                Util.validateText(emailEditPassword.getText().toString(), Util.ValidateType.PASSWORD))? Color.WHITE:getResources().getColor(R.color.disabled_gray_text)));
+        emailSubmitButton.setEnabled(
+                emailIsGood &&
+                validateText(emailEditPassword.getText().toString(), ValidateType.PASSWORD));
+        emailSubmitButton.setTextColor((
+                validateText(emailEditEmail.getText().toString(), ValidateType.EMAIL) &&
+                validateText(emailEditPassword.getText().toString(), ValidateType.PASSWORD))? Color.WHITE:getResources().getColor(R.color.disabled_gray_text));
     }
 }
