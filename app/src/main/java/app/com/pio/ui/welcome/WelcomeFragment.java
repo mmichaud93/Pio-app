@@ -80,7 +80,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     private boolean mSignInClicked;
     private boolean mIntentInProgress;
 
-    private boolean emailIsGood = false;
+    private boolean isLoggingIn = false;
 
     WelcomePagerAdapter welcomePagerAdapter;
 
@@ -214,19 +214,19 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                         @Override
                         public void success(PioApiResponse pioApiResponse, Response response) {
                             if (pioApiResponse.getMsg().equals("false")) {
-                                emailIsGood = true;
+                                isLoggingIn = true;
                                 emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
                             }
                         }
 
                         @Override
                         public void failure(RetrofitError error) {
-                            emailIsGood = false;
+                            isLoggingIn = false;
                             emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
                         }
                     });
                 } else {
-                    emailIsGood = false;
+                    isLoggingIn = false;
                     emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
                 }
                 unlockSubmit();
@@ -422,7 +422,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     private void unlockSubmit() {
 
         emailSubmitButton.setEnabled(
-                emailIsGood &&
+                validateText(emailEditEmail.getText().toString(), ValidateType.EMAIL) &&
                 validateText(emailEditPassword.getText().toString(), ValidateType.PASSWORD));
         emailSubmitButton.setTextColor((
                 validateText(emailEditEmail.getText().toString(), ValidateType.EMAIL) &&
