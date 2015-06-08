@@ -1,23 +1,23 @@
 package app.com.pio.ui.map;
 
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-
-import org.h2.mvstore.MVStore;
-import org.h2.mvstore.rtree.MVRTreeMap;
-import org.h2.mvstore.rtree.SpatialKey;
-
-import java.util.Iterator;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
 
 import app.com.pio.R;
+import app.com.pio.database.MVDatabase;
 import butterknife.ButterKnife;
 
 /**
@@ -28,6 +28,8 @@ public class PioMapFragment extends Fragment {
     View root;
     SupportMapFragment mapFragment;
     private GoogleMap googleMap;
+    private TileOverlay overlay;
+    private MaskTileProvider tileProvider;
 
     public static PioMapFragment newInstance() {
 
@@ -51,28 +53,6 @@ public class PioMapFragment extends Fragment {
             mapFragment = SupportMapFragment.newInstance();
             fm.beginTransaction().replace(R.id.map_container, mapFragment).commit();
         }
-
-        // create an in-memory store
-        MVStore s = MVStore.open(null);
-
-        // open an R-tree map
-        MVRTreeMap<String> r = s.openMap("data",
-                new MVRTreeMap.Builder<String>());
-
-        // add two key-value pairs
-        // the first value is the key id (to make the key unique)
-        // then the min x, max x, min y, max y
-        r.add(new SpatialKey(0, -3f, -2f, 2f, 3f), "left");
-        r.add(new SpatialKey(1, 3f, 4f, 4f, 5f), "right");
-
-        // iterate over the intersecting keys
-        Iterator<SpatialKey> it =
-                r.findIntersectingKeys(new SpatialKey(0, 0f, 9f, 3f, 6f));
-        while(it.hasNext()) {
-            SpatialKey k = it.next();
-            Log.d("PIO", k + ": " + r.get(k));
-        }
-        s.close();
     }
 
     @Override
@@ -89,5 +69,24 @@ public class PioMapFragment extends Fragment {
         googleMap.setIndoorEnabled(false);
         googleMap.setMyLocationEnabled(true);
         googleMap.getUiSettings().setZoomControlsEnabled(false);
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude);
+                Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
+                overlay.clearTileCache();
+            }
+        });
+
+        // Create new TileOverlayOptions instance.
+        tileProvider = new MaskTileProvider(googleMap);
+        //tileProvider.setPoints(points);
+        TileOverlayOptions opts = new TileOverlayOptions();
+        opts.fadeIn(true);
+        // Set the tile provider to your custom implementation.
+        opts.tileProvider(tileProvider);
+        // Add the tile overlay to the map.
+        overlay = googleMap.addTileOverlay(opts);
     }
 }
