@@ -14,4 +14,7 @@ public interface PioApiService {
 
     @GET("/users/exist")
     public void userExist(@Query("email") String email, Callback<PioApiResponse> callback);
+
+    @GET("/users/login")
+    public void loginUser(@Query("email") String email, @Query("pass") String pass, Callback<PioApiResponse> callback);
 }
