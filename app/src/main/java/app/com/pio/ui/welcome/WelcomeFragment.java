@@ -350,7 +350,6 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
         mSignInClicked = false;
 
 
-
         // do things with the login info
         loading.setVisibility(View.VISIBLE);
         final String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
@@ -372,7 +371,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                             ((MainActivity) getActivity()).initRegularApp(null);
                                             getActivity().supportInvalidateOptionsMenu();
                                         } else {
-                                            if(mSignInClicked) {
+                                            if (mSignInClicked) {
                                                 Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
                                             }
                                         }
