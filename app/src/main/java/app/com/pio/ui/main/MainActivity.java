@@ -17,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import app.com.pio.R;
+import app.com.pio.database.MVDatabase;
 import app.com.pio.ui.welcome.WelcomeFragment;
 import app.com.pio.ui.main.drawer.DrawerAdapter;
 import app.com.pio.ui.main.drawer.DrawerHeaderItem;
@@ -47,6 +48,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MVDatabase.initializeDatabase(this);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         setSupportActionBar(toolbar);
@@ -58,6 +60,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             // continue with app use
             initRegularApp(savedInstanceState);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        MVDatabase.closeDatabase();
     }
 
     public void initLogin(Bundle savedInstanceState) {
