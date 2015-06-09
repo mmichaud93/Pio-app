@@ -28,4 +28,8 @@ public class PioApiController {
     public static void userExists(String email, Callback<PioApiResponse> callback) {
         pioApiService.userExist(email, callback);
     }
+
+    public static void loginUser(String email, String pass, Callback<PioApiResponse> callback) {
+        pioApiService.loginUser(email, pass, callback);
+    }
 }
