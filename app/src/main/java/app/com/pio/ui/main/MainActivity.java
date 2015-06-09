@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 import app.com.pio.R;
@@ -23,6 +25,7 @@ import app.com.pio.ui.main.drawer.DrawerListItem;
 import app.com.pio.ui.map.PioMapFragment;
 import app.com.pio.ui.profile.PioProfileFragment;
 import app.com.pio.utility.PrefUtil;
+import app.com.pio.utility.RoundedImageUtil;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -81,7 +84,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(drawerLayout.isDrawerOpen(Gravity.START)) {
+                if (drawerLayout.isDrawerOpen(Gravity.START)) {
                     drawerLayout.closeDrawers();
                     toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
                 } else {
@@ -97,14 +100,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         items = new ArrayList<DrawerItem>();
         //get profile object - mock up for now
         //newprofile model ...
-        items.add(new DrawerHeaderItem("THIS IS A HEADER","https://lh3.googleusercontent.com/-uPDbuzhFn2Y/AAAAAAAAAAI/AAAAAAAABdE/tFm-2KDRYyA/s160-c-k-no/photo.jpg" ));
-        for(String s : navBarItems) {
+        items.add(new DrawerHeaderItem("THIS IS A HEADER", "https://lh3.googleusercontent.com/-uPDbuzhFn2Y/AAAAAAAAAAI/AAAAAAAABdE/tFm-2KDRYyA/s160-c-k-no/photo.jpg"));
+        for (String s : navBarItems) {
             items.add(new DrawerListItem(s));
         }
 
         drawerList.setAdapter(new DrawerAdapter(this, items));
         drawerList.setOnItemClickListener(this);
+
+
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

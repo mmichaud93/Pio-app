@@ -1,14 +1,20 @@
 package app.com.pio.ui.main.drawer;
 
-import android.media.Image;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
-
 import app.com.pio.R;
+import app.com.pio.utility.RoundedImageUtil;
 
 
 /**
@@ -19,9 +25,11 @@ public class DrawerHeaderItem implements DrawerItem {
     private String itemText;
     private String itemImage;
 
+
     public DrawerHeaderItem(String itemText, String itemImage) {
         this.itemText = itemText;
         this.itemImage = itemImage;
+
 
     }
 
@@ -47,13 +55,19 @@ public class DrawerHeaderItem implements DrawerItem {
 
         viewHolder.link.setText(itemText);
 
-        Picasso.with(convertView.getContext()).load(itemImage).into(viewHolder.profileImage);
+        Picasso.with(convertView.getContext()).load(itemImage).transform(new RoundedImageUtil(96,0)).into(viewHolder.profileImage);
 
         return convertView;
+
+
     }
     //holds views, define everything like textview
     private static class ViewHolder {
         TextView link;
         ImageView profileImage;
     }
+
+
+
+
 }
