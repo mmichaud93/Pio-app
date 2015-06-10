@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -97,9 +98,11 @@ public class MaskTileProvider implements TileProvider {
                         (float)(bounds.northeast.latitude + 0.01), (float)(bounds.northeast.longitude + 0.01));
                 // draw the points on the mask as black circles
                 int pointsOnTile = 0;
+                int incrementer = ps.size()/5000 + 1;
                 if(ps.size() > 0 ) {
 
-                    for (PointF point : ps) {
+                    for (int i = 0; i < ps.size(); i+=incrementer) {
+                        PointF point = ps.get(i);
                         double thisTileWidth = bounds.northeast.longitude - bounds.southwest.longitude;
                         double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
 
@@ -135,7 +138,7 @@ public class MaskTileProvider implements TileProvider {
 
                 // release the lock
                 lock = false;
-
+                Log.d("MaskTileProvider","time: "+(System.currentTimeMillis()-start)+", ps.size(): "+ps.size());
                 // return the tile
                 return tile;
             } catch(Exception e) {

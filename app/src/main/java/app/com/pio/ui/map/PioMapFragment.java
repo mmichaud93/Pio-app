@@ -65,28 +65,30 @@ public class PioMapFragment extends Fragment {
     }
 
     private void setUpMap() {
-        googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        googleMap.setIndoorEnabled(false);
-        googleMap.setMyLocationEnabled(true);
-        googleMap.getUiSettings().setZoomControlsEnabled(false);
+        if(googleMap!=null) {
+            googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            googleMap.setIndoorEnabled(false);
+            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setZoomControlsEnabled(false);
 
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude);
-                Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
-                overlay.clearTileCache();
-            }
-        });
+            googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude);
+                    Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
+                    overlay.clearTileCache();
+                }
+            });
 
-        // Create new TileOverlayOptions instance.
-        tileProvider = new MaskTileProvider(googleMap);
-        //tileProvider.setPoints(points);
-        TileOverlayOptions opts = new TileOverlayOptions();
-        opts.fadeIn(true);
-        // Set the tile provider to your custom implementation.
-        opts.tileProvider(tileProvider);
-        // Add the tile overlay to the map.
-        overlay = googleMap.addTileOverlay(opts);
+            // Create new TileOverlayOptions instance.
+            tileProvider = new MaskTileProvider(googleMap);
+            //tileProvider.setPoints(points);
+            TileOverlayOptions opts = new TileOverlayOptions();
+            opts.fadeIn(true);
+            // Set the tile provider to your custom implementation.
+            opts.tileProvider(tileProvider);
+            // Add the tile overlay to the map.
+            overlay = googleMap.addTileOverlay(opts);
+        }
     }
 }

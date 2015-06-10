@@ -30,9 +30,16 @@ public class MVDatabase {
         mvrTreeMap = mvStore.openMap("data", new MVRTreeMap.Builder<String>().dimensions(2).
                 valueType(StringDataType.INSTANCE));
 
-//        for(SpatialKey key : mvrTreeMap.keyList()) {
-//            mvrTreeMap.remove(key);
-//        }
+
+
+//        eraseDatabase(true);
+
+//        addTestPoints(new PointF(42.345400f, -71.098260f));
+//        addTestPoints(new PointF(41.345400f, -72.098260f));
+//        addTestPoints(new PointF(43.345400f, -71.098260f));
+//        addTestPoints(new PointF(41.345400f, -71.098260f));
+//        addTestPoints(new PointF(42.345400f, -72.098260f));
+//        addTestPoints(new PointF(43.345400f, -72.098260f));
 //
 //        storePoint(42.345400f, -71.098260f);
 //        storePoint(42.345439f, -71.098090f);
@@ -61,10 +68,22 @@ public class MVDatabase {
         while(it.hasNext()) {
             SpatialKey k = it.next();
             points.add(new PointF(k.max(0), k.max(1)));
-            //Log.d("PIO", k + ": " + mvrTreeMap.get(k));
-//            Log.d("PIO", k.max(0) + ": " + k.max(1));
         }
 
         return points;
     }
+
+    private static void eraseDatabase(boolean areYouSure) {
+        if(areYouSure) {
+            mvrTreeMap.clear();
+        }
+    }
+
+    private static void addTestPoints(PointF from) {
+        for(int i = 0; i < 50000; i++) {
+            storePoint((float)(from.x+Math.random()*1f), (float)(from.y+Math.random()*1f));
+        }
+    }
+
+
 }
