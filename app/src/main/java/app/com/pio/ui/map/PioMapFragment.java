@@ -1,15 +1,15 @@
 package app.com.pio.ui.map;
 
-import android.graphics.Point;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -77,6 +77,14 @@ public class PioMapFragment extends Fragment {
                     MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude);
                     Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
                     overlay.clearTileCache();
+                }
+            });
+            googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+                @Override
+                public void onMyLocationChange(Location location) {
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(location.getLatitude(), location.getLongitude()), 14), 1500, null);
+                    googleMap.setOnMyLocationChangeListener(null);
                 }
             });
 

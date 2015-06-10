@@ -44,6 +44,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
     boolean isInLogin = false;
+    int currentPosition = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,10 +147,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        if(position == currentPosition) {
+            drawerLayout.closeDrawers();
+            return;
+        }
+
         switch(position) {
             case 0: // profile
                 cleanActionBar();
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, PioProfileFragment.newInstance()).commit();
+                drawerLayout.closeDrawers();
                 break;
             case 1: // map
                 cleanActionBar();
@@ -165,6 +173,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 drawerLayout.closeDrawers();
                 break;
         }
+
+        currentPosition = position;
     }
 
     private void cleanActionBar() {
