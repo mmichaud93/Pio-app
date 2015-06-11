@@ -12,4 +12,16 @@
     <color name="disabled_gray_text">#BFBFBF</color>
     <color name="button_gray">#D4D4D4</color>
     <color name="button_gray_pressed">#BFBFBF</color>
+
+    <color name="stop_color">#F44336</color>
+    <color name="stop_color_pressed">#E53935</color>
+
+    <color name="start_color">#4CAF50</color>
+    <color name="start_color_pressed">#43A047</color>
+
+    <color name="warn_color">#FFC107</color>
+    <color name="warn_color_pressed">#FFB300</color>
+
+    <color name="gps_grey">#888888</color>
+    <color name="text_color">#6f6f6f</color>
 </resources>

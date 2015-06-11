@@ -12,8 +12,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.crashlytics.android.Crashlytics;
 import com.squareup.picasso.Picasso;
 
+import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
 import app.com.pio.R;
@@ -48,6 +50,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         MVDatabase.initializeDatabase(this);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);

@@ -15,10 +15,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import app.com.pio.ui.map.MaskTileProvider;
+
 /**
  * Created by mmichaud on 6/6/15.
  */
 public class MVDatabase {
+
+    private static String TAG = "MVDatabase";
 
     private static MVStore mvStore;
     private static MVRTreeMap<String> mvrTreeMap;
@@ -26,9 +30,14 @@ public class MVDatabase {
     private static final String fileLocation = "/database.h3";
 
     public static void initializeDatabase(Context context) {
-        mvStore = MVStore.open(context.getFilesDir()+fileLocation);
-        mvrTreeMap = mvStore.openMap("data", new MVRTreeMap.Builder<String>().dimensions(2).
-                valueType(StringDataType.INSTANCE));
+        if (mvStore == null) {
+            mvStore = MVStore.open(context.getFilesDir()+fileLocation);
+        }
+        if (mvrTreeMap == null) {
+            mvrTreeMap = mvStore.openMap("data", new MVRTreeMap.Builder<String>().dimensions(2).
+                    valueType(StringDataType.INSTANCE));
+        }
+
 
 
 
@@ -54,16 +63,35 @@ public class MVDatabase {
     }
 
     public static void closeDatabase() {
+        Log.d(TAG, "closing database");
         mvStore.close();
     }
 
-    public static void storePoint(float x, float y) {
-        mvrTreeMap.add(new SpatialKey((long) (Math.random() * Long.MAX_VALUE), x, x, y, y), "(" + x + ", " + y + ")");
+    public static boolean storePoint(float x, float y, boolean checkForDuplicates) {
+        if(checkForDuplicates) {
+            List<PointF> points = getPoints(x- 0.0001f, y-0.0001f, x+0.0001f, y+0.0001f);
+            if(points.size()>0) {
+                return false;
+            }
+        }
+        if(mvrTreeMap.isClosed()) {
+            mvrTreeMap = mvStore.openMap("data", new MVRTreeMap.Builder<String>().dimensions(2).
+                    valueType(StringDataType.INSTANCE));
+        }
+        if(!mvrTreeMap.isClosed()) {
+            Log.d("MVDatabase", "storing point, x: " + x + ", y: " + y);
+            mvrTreeMap.add(new SpatialKey((long) (Math.random() * Long.MAX_VALUE), x, x, y, y), "(" + x + ", " + y + ")");
+        }
+        return true;
     }
 
     public static List<PointF> getPoints(float minX, float minY, float maxX, float maxY) {
         List<PointF> points = new ArrayList<PointF>();
+        if(mvrTreeMap.isClosed()) {
 
+            mvrTreeMap = mvStore.openMap("data", new MVRTreeMap.Builder<String>().dimensions(2).
+                    valueType(StringDataType.INSTANCE));
+        }
         Iterator<SpatialKey> it = mvrTreeMap.findContainedKeys(new SpatialKey(0, minX, maxX, minY, maxY));
         while(it.hasNext()) {
             SpatialKey k = it.next();
@@ -81,7 +109,7 @@ public class MVDatabase {
 
     private static void addTestPoints(PointF from) {
         for(int i = 0; i < 50000; i++) {
-            storePoint((float)(from.x+Math.random()*1f), (float)(from.y+Math.random()*1f));
+            storePoint((float)(from.x+Math.random()*1f), (float)(from.y+Math.random()*1f), false);
         }
     }
 

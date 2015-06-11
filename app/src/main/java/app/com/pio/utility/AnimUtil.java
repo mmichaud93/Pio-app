@@ -7,6 +7,9 @@ import android.animation.Animator;
  */
 public class AnimUtil {
 
+    public static int animationSpeed = 375;
+    public static int animationSpeedLong = 550;
+
     public static Animator.AnimatorListener blankAnimationListener = new Animator.AnimatorListener() {
         @Override
         public void onAnimationStart(Animator animator) {

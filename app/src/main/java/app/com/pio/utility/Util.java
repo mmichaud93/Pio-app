@@ -35,6 +35,15 @@ public class Util {
         return px / context.getResources().getDisplayMetrics().density;
     }
 
+    public static String formatLongToTime(long time) {
+        time/=1000;
+        int hours = (int) (time / 3600);
+        int minutes = (int) (time / 60);
+        int seconds = (int) (time - minutes * 60 - hours * 3600);
+
+        return (hours < 10 ? hours : hours)+":"+(minutes < 10 ? "0"+minutes : minutes)+":"+(seconds < 10 ? "0"+seconds : ""+seconds);
+    }
+
     public enum ValidateType {
         EMAIL, PASSWORD, TEXT
     }
