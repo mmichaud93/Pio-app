@@ -26,7 +26,6 @@ import app.com.pio.ui.main.drawer.DrawerListItem;
 import app.com.pio.ui.map.PioMapFragment;
 import app.com.pio.ui.profile.PioProfileFragment;
 import app.com.pio.utility.PrefUtil;
-import app.com.pio.utility.RoundedImageUtil;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 

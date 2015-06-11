@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,8 @@ import static app.com.pio.utility.Util.*;
  */
 public class WelcomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
+
+    private static String TAG = "WelcomeFragment";
 
     View root;
     @InjectView(R.id.sign_in_parent)
@@ -214,19 +217,22 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
             @Override
             public void afterTextChanged(Editable editable) {
                 if (validateText(editable.toString(), ValidateType.EMAIL)) {
+                    emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
                     PioApiController.userExists(editable.toString(), new Callback<PioApiResponse>() {
                         @Override
                         public void success(PioApiResponse pioApiResponse, Response response) {
-                            if (pioApiResponse.getMsg().equals("false")) {
+                            if (pioApiResponse.getMsg().equals("true")) {
                                 isLoggingIn = true;
+                            } else {
+                                isLoggingIn = false;
                             }
-                            emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
                         }
 
                         @Override
                         public void failure(RetrofitError error) {
                             isLoggingIn = false;
                             emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
+                            Log.d(TAG, "could not verify user existence", error);
                         }
                     });
                 } else {
@@ -265,7 +271,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                 loading.setVisibility(View.VISIBLE);
                 if (isLoggingIn) {
                     // check password
-                    PioApiController.loginUser(emailEditEmail.getText().toString(),
+                    PioApiController.loginUser(getActivity(), emailEditEmail.getText().toString(),
                             emailEditPassword.getText().toString(), new Callback<PioApiResponse>() {
                                 @Override
                                 public void success(PioApiResponse pioApiResponse, Response response) {
@@ -299,7 +305,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                     PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
                     PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
 
-                    PioApiController.sendNewUser(emailEditEmail.getText().toString(),
+                    PioApiController.sendNewUser(getActivity(), emailEditEmail.getText().toString(),
                             emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), new Callback<PioApiResponse>() {
                                 @Override
                                 public void success(PioApiResponse pioApiResponse, Response response) {
@@ -361,7 +367,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                         public void success(PioApiResponse pioApiResponse, Response response) {
                             if (pioApiResponse.getMsg().equals("true")) {
                                 // email exists, try to login
-                                PioApiController.loginUser(email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), new Callback<PioApiResponse>() {
+                                PioApiController.loginUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), new Callback<PioApiResponse>() {
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
                                         loading.setVisibility(View.GONE);
@@ -385,7 +391,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                 });
                             } else {
                                 // email does not exists, create new user
-                                PioApiController.sendNewUser(email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), PrefUtil.LoginTypes.GOOGLE.name(), new Callback<PioApiResponse>() {
+                                PioApiController.sendNewUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), PrefUtil.LoginTypes.GOOGLE.name(), new Callback<PioApiResponse>() {
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
                                         loading.setVisibility(View.GONE);
