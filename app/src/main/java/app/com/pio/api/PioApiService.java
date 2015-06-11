@@ -10,11 +10,17 @@ import retrofit.http.Query;
 public interface PioApiService {
 
     @GET("/users/new")
-    public void newUser(@Query("email") String email, @Query("pass") String pass, @Query("type") String type, Callback<PioApiResponse> callback);
+    public void newUser(@Query("email") String email, @Query("pass") String pass, @Query("type") String type,
+                        @Query("device_name") String name, @Query("device_os") String deviceOs, @Query("device_app_ver") String deviceAppVer,
+                        @Query("device_screen_width") int width, @Query("device_screen_height") int height, @Query("device_screen_ppi") float ppi,
+                        Callback<PioApiResponse> callback);
 
     @GET("/users/exist")
     public void userExist(@Query("email") String email, Callback<PioApiResponse> callback);
 
     @GET("/users/login")
-    public void loginUser(@Query("email") String email, @Query("pass") String pass, Callback<PioApiResponse> callback);
+    public void loginUser(@Query("email") String email, @Query("pass") String pass,
+                          @Query("device_name") String name, @Query("device_os") String deviceOs, @Query("device_app_ver") String deviceAppVer,
+                          @Query("device_screen_width") int width, @Query("device_screen_height") int height, @Query("device_screen_ppi") float ppi,
+                          Callback<PioApiResponse> callback);
 }
