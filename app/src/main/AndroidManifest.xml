@@ -18,7 +18,8 @@
         android:theme="@style/Theme.Pio" >
         <activity
             android:name=".ui.main.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,10 +27,20 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".service.LocationUpdateService"
+            android:icon="@drawable/ic_launcher"
+            android:label="Getting Location"
+            >
+        </service>
+
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="5041430ca9035b0d60d4ece8a261896fb71e4cd8" />
     </application>
 
 </manifest>

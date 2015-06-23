@@ -72,7 +72,7 @@ public class MaskTileProvider implements TileProvider {
 
         // this paint is the fog
         fogPaint = new Paint();
-        fogPaint.setColor(Color.argb(238, 200, 200, 200));
+        fogPaint.setColor(Color.argb(212, 255, 255, 255));
 
         // the mask/result canvas and bitmap are global variables to save on some memory, thus we have
         // to lock out some tiles so that only one is being created at a time

@@ -91,8 +91,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
 
     WelcomePagerAdapter welcomePagerAdapter;
 
-    int animationSpeed = 375;
-    int animationSpeedLong = 550;
+
 
     public static WelcomeFragment newInstance() {
 
@@ -148,8 +147,8 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                 @Override
                                 public void onAnimationEnd(Animator animator) {
                                     signInParent.setAlpha(1);
-                                    welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(dpToPx(-80, getActivity())).setDuration(animationSpeed).start();
-                                    signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(dpToPx(-80, getActivity())).setDuration(animationSpeed).setListener(AnimUtil.blankAnimationListener).start();
+                                    welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(dpToPx(-80, getActivity())).setDuration(AnimUtil.animationSpeed).start();
+                                    signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).translationYBy(dpToPx(-80, getActivity())).setDuration(AnimUtil.animationSpeed).setListener(AnimUtil.blankAnimationListener).start();
                                 }
 
                                 @Override
@@ -371,9 +370,14 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
                                         loading.setVisibility(View.GONE);
+
                                         if (pioApiResponse.getMsg().equals("true")) {
                                             // login success
                                             // TODO: I dont know what else we need to do here
+                                            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
+                                            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
+                                            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
+
                                             ((MainActivity) getActivity()).initRegularApp(null);
                                             getActivity().supportInvalidateOptionsMenu();
                                         } else {
@@ -485,9 +489,9 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
             @Override
             public void onAnimationEnd(Animator animator) {
                 emailSignIn.setAlpha(1);
-                emailSignIn.animate().y(0).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationSpeedLong).setListener(AnimUtil.blankAnimationListener).start();
-                signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationSpeedLong).translationYBy(-1 * root.getHeight()).start();
-                welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationSpeedLong).translationYBy(-1 * root.getHeight()).start();
+                emailSignIn.animate().y(0).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeedLong).setListener(AnimUtil.blankAnimationListener).start();
+                signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeedLong).translationYBy(-1 * root.getHeight()).start();
+                welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeedLong).translationYBy(-1 * root.getHeight()).start();
 
             }
 
@@ -504,10 +508,11 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     }
 
     private void collapseEmailSignIn() {
-        signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationSpeedLong).translationYBy(root.getHeight()).start();
-        welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationSpeedLong).translationYBy(root.getHeight()).start();
 
-        emailSignIn.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(animationSpeedLong).y(root.getHeight()).setListener(new Animator.AnimatorListener() {
+        signInParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeedLong).translationYBy(root.getHeight()).start();
+        welcomeBulletParent.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeedLong).translationYBy(root.getHeight()).start();
+
+        emailSignIn.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeedLong).y(root.getHeight()).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
             }

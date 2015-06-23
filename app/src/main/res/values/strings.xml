@@ -6,6 +6,16 @@
     <string name="sign_in_email">Sign in with Email</string>
     <string name="back">Back</string>
     <string name="submit">Submit</string>
+    <string name="area">Area</string>
+    <string name="session_time">Session Time</string>
+    <string name="gps_strength">GPS Strength</string>
+    <string name="location">Location</string>
+    <string name="unknown">unknown</string>
+
+    <string name="service_ticker">Beginning your journey!</string>
+    <string name="service_title">Exploring the world...</string>
+    <string name="service_text">%skm² this session</string>
+    <string name="area_km">%s km²</string>
 
 
     <!--
