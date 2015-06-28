@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
@@ -90,6 +91,8 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     private boolean isLoggingIn = false;
 
     WelcomePagerAdapter welcomePagerAdapter;
+
+    private int emailCheckAttempts = 0;
 
 
 
@@ -216,6 +219,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
             @Override
             public void afterTextChanged(Editable editable) {
                 if (validateText(editable.toString(), ValidateType.EMAIL)) {
+                    emailCheckAttempts++;
                     emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
                     PioApiController.userExists(editable.toString(), new Callback<PioApiResponse>() {
                         @Override
@@ -225,6 +229,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                             } else {
                                 isLoggingIn = false;
                             }
+                            emailCheckAttempts--;
                         }
 
                         @Override
@@ -232,6 +237,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                             isLoggingIn = false;
                             emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
                             Log.d(TAG, "could not verify user existence", error);
+                            emailCheckAttempts--;
                         }
                     });
                 } else {
@@ -267,63 +273,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
         emailSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loading.setVisibility(View.VISIBLE);
-                if (isLoggingIn) {
-                    // check password
-                    PioApiController.loginUser(getActivity(), emailEditEmail.getText().toString(),
-                            emailEditPassword.getText().toString(), new Callback<PioApiResponse>() {
-                                @Override
-                                public void success(PioApiResponse pioApiResponse, Response response) {
-                                    loading.setVisibility(View.GONE);
-                                    if (pioApiResponse.getMsg().equals("true")) {
-                                        // login success
-                                        // TODO: I dont know what else we need to do here
-                                        PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
-                                        PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
-                                        PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
-
-                                        ((MainActivity) getActivity()).initRegularApp(null);
-                                        getActivity().supportInvalidateOptionsMenu();
-                                    } else {
-                                        // login failure
-                                        Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
-                                    }
-                                }
-
-                                @Override
-                                public void failure(RetrofitError error) {
-                                    // login failure
-                                    loading.setVisibility(View.GONE);
-                                    Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
-                                }
-                            });
-                } else {
-                    // new user
-
-                    PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
-                    PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
-                    PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
-
-                    PioApiController.sendNewUser(getActivity(), emailEditEmail.getText().toString(),
-                            emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), new Callback<PioApiResponse>() {
-                                @Override
-                                public void success(PioApiResponse pioApiResponse, Response response) {
-                                    loading.setVisibility(View.GONE);
-                                    if (pioApiResponse.getCode() == 200) {
-                                        ((MainActivity) getActivity()).initRegularApp(null);
-                                        getActivity().supportInvalidateOptionsMenu();
-                                    } else {
-                                        Util.makeCroutonText("Could not create new user, try again later", getActivity());
-                                    }
-                                }
-
-                                @Override
-                                public void failure(RetrofitError error) {
-                                    loading.setVisibility(View.GONE);
-                                    Util.makeCroutonText("Could not create new user, try again later", getActivity());
-                                }
-                            });
-                }
+                attemptLogin();
             }
         });
 
@@ -336,6 +286,75 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                 .build();
 
         return root;
+    }
+
+    private void attemptLogin() {
+        if(emailCheckAttempts > 0) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    attemptLogin();
+                }
+            }, 500);
+        }
+        loading.setVisibility(View.VISIBLE);
+        if (isLoggingIn) {
+            // check password
+            PioApiController.loginUser(getActivity(), emailEditEmail.getText().toString(),
+                    emailEditPassword.getText().toString(), new Callback<PioApiResponse>() {
+                        @Override
+                        public void success(PioApiResponse pioApiResponse, Response response) {
+                            loading.setVisibility(View.GONE);
+                            if (pioApiResponse.getMsg().equals("true")) {
+                                // login success
+                                // TODO: I dont know what else we need to do here
+                                PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
+                                PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
+                                PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
+
+                                ((MainActivity) getActivity()).initRegularApp(null);
+                                getActivity().supportInvalidateOptionsMenu();
+                            } else {
+                                // login failure
+                                Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+                            }
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            // login failure
+                            loading.setVisibility(View.GONE);
+                            Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+                        }
+                    });
+        } else {
+            // new user
+
+            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
+            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
+            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
+
+            PioApiController.sendNewUser(getActivity(), emailEditEmail.getText().toString(),
+                    emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), new Callback<PioApiResponse>() {
+                        @Override
+                        public void success(PioApiResponse pioApiResponse, Response response) {
+                            loading.setVisibility(View.GONE);
+                            if (pioApiResponse.getCode() == 200) {
+                                ((MainActivity) getActivity()).initRegularApp(null);
+                                getActivity().supportInvalidateOptionsMenu();
+                            } else {
+                                Util.makeCroutonText("Could not create new user, try again later", getActivity());
+                            }
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            loading.setVisibility(View.GONE);
+                            Util.makeCroutonText("Could not create new user, try again later", getActivity());
+                        }
+                    });
+        }
     }
 
     @Override
@@ -353,8 +372,6 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     @Override
     public void onConnected(Bundle bundle) {
         mSignInClicked = false;
-
-
         // do things with the login info
         loading.setVisibility(View.VISIBLE);
         final String email = Plus.AccountApi.getAccountName(mGoogleApiClient);

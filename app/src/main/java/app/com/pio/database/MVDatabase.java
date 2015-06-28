@@ -28,8 +28,10 @@ public class MVDatabase {
     private static MVRTreeMap<String> mvrTreeMap;
 
     private static final String fileLocation = "/database.h3";
+    private static Context context;
 
     public static void initializeDatabase(Context context) {
+        MVDatabase.context = context;
         if (mvStore == null) {
             mvStore = MVStore.open(context.getFilesDir()+fileLocation);
         }
@@ -69,7 +71,9 @@ public class MVDatabase {
 
     public static boolean storePoint(float x, float y, boolean checkForDuplicates) {
         if(checkForDuplicates) {
-            List<PointF> points = getPoints(x- 0.0001f, y-0.0001f, x+0.0001f, y+0.0001f);
+            //Log.d(TAG, "0.0001f to lat: "+(Math.cos(Math.toRadians(y))*0.0001));
+            float xDiff = ((float)(Math.cos(Math.toRadians(x))*0.00005f));
+            List<PointF> points = getPoints(x-xDiff, y- 0.00005f, x+xDiff, y+ 0.00005f);
             if(points.size()>0) {
                 return false;
             }
@@ -88,7 +92,9 @@ public class MVDatabase {
     public static List<PointF> getPoints(float minX, float minY, float maxX, float maxY) {
         List<PointF> points = new ArrayList<PointF>();
         if(mvrTreeMap.isClosed()) {
-
+            if(mvStore.isClosed() && context!=null) {
+                mvStore = MVStore.open(context.getFilesDir()+fileLocation);
+            }
             mvrTreeMap = mvStore.openMap("data", new MVRTreeMap.Builder<String>().dimensions(2).
                     valueType(StringDataType.INSTANCE));
         }

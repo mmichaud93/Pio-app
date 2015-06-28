@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -46,8 +47,8 @@ public class MaskTileProvider implements TileProvider {
     GoogleMap map;
 
     int bitmapWidth = 256;
-    int bitmapHeight = 256;
-    public static final double radiusConstant = 0.0004;//423902130126953;
+    int bitmapHeight = 256;//0.0001
+    public static final double radiusConstant = 0.0001;// use 0.0000275 for no spacing between points
 
 //    int width = 180/4;
 //    int height = 180/4;
@@ -79,9 +80,6 @@ public class MaskTileProvider implements TileProvider {
         points = new ArrayList<PointF>();
 
     }
-    public void setPoints(ArrayList<PointF> points) {
-        this.points = points;
-    }
     @Override
     public Tile getTile(int x, int y, int zoom) {
         // we only want to do one tile at a time, if we don't we will mess up the Bitmap creation stuff
@@ -94,8 +92,8 @@ public class MaskTileProvider implements TileProvider {
                 // generate the mask
                 mask = Bitmap.createBitmap(bitmapWidth, bitmapHeight, conf);
                 maskCanvas = new Canvas(mask);
-                List<PointF> ps = MVDatabase.getPoints((float) (bounds.southwest.latitude - 0.01), (float)(bounds.southwest.longitude - 0.01),
-                        (float)(bounds.northeast.latitude + 0.01), (float)(bounds.northeast.longitude + 0.01));
+                List<PointF> ps = MVDatabase.getPoints((float) (bounds.southwest.latitude - toLatitude(0.001)), (float)(bounds.southwest.longitude - 0.001),
+                        (float)(bounds.northeast.latitude + toLatitude(0.001)), (float)(bounds.northeast.longitude + 0.001));
                 // draw the points on the mask as black circles
                 int pointsOnTile = 0;
                 int incrementer = ps.size()/5000 + 1;
@@ -105,7 +103,6 @@ public class MaskTileProvider implements TileProvider {
                         PointF point = ps.get(i);
                         double thisTileWidth = bounds.northeast.longitude - bounds.southwest.longitude;
                         double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
-
                         float radius = (float) (radiusConstant * (float) bitmapWidth / thisTileWidth);
                         clearAwayPaint.setShader(new RadialGradient(
                                 (float) ((((point.y - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),

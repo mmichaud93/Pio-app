@@ -256,7 +256,7 @@ public class PioMapFragment extends Fragment {
         stopTimer();
         RecordUtil.stopRecording(getActivity());
     }
-
+    LatLng firstLatLng = null;
     private void setUpMap() {
         if (googleMap != null) {
             googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -267,8 +267,22 @@ public class PioMapFragment extends Fragment {
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
-                    MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude, false);
-                    Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
+//                    if (firstLatLng==null) {
+//                        firstLatLng = latLng;
+//                        return;
+//                    }
+//                    firstLatLng = new LatLng(latLng.latitude+0.005, latLng.longitude);
+//                    for(int i = 0; i < 1000; i++) {
+//                        MVDatabase.storePoint((float) (firstLatLng.latitude+(latLng.latitude - firstLatLng.latitude)/1000*i)
+//                                , (float) (firstLatLng.longitude+(latLng.longitude - firstLatLng.longitude)/1000*i), true);
+//                    }
+//                    firstLatLng = new LatLng(latLng.latitude, latLng.longitude+0.005);
+//                    for(int i = 0; i < 1000; i++) {
+//                        MVDatabase.storePoint((float) (firstLatLng.latitude+(latLng.latitude - firstLatLng.latitude)/1000*i)
+//                                , (float) (firstLatLng.longitude+(latLng.longitude - firstLatLng.longitude)/1000*i), true);
+//                    }
+//                    firstLatLng = null;
+//                    Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
                     overlay.clearTileCache();
                 }
             });

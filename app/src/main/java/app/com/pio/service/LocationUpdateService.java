@@ -102,9 +102,6 @@ public class LocationUpdateService extends Service {
     };
 
     public void registerLocationChange(Location location) {
-        if(RecordUtil.getGpsStrength() > 40) {
-            return;
-        }
         if (MVDatabase.storePoint((float) location.getLatitude(), (float) location.getLongitude(), true)) {
             float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
             RecordUtil.recordPoint(uncoveredArea);
