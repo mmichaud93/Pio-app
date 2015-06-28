@@ -15,6 +15,7 @@ import android.widget.ListView;
 import com.crashlytics.android.Crashlytics;
 import com.squareup.picasso.Picasso;
 
+import app.com.pio.ui.map.MaskTileProvider;
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
