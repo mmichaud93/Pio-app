@@ -8,7 +8,9 @@ import android.os.Build;
 import android.util.Log;
 import android.view.Display;
 
+import app.com.pio.R;
 import retrofit.Callback;
+import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 
 /**
@@ -20,11 +22,18 @@ public class PioApiController {
 
     static PioApiService pioApiService;
 
-    static {
+    public static void initializeController(final Context context) {
         if (pioApiService == null) {
+            RequestInterceptor requestInterceptor = new RequestInterceptor() {
+                @Override
+                public void intercept(RequestInterceptor.RequestFacade request) {
+                    request.addHeader("x-access-token", context.getString(R.string.pio_api_key_prod));
+                }
+            };
             RestAdapter restAdapter = new RestAdapter.Builder()
-                    .setEndpoint("http://pio-api.herokuapp.com/api")
+                    .setEndpoint(context.getString(R.string.pio_api_url_prod))
                     .setLogLevel(RestAdapter.LogLevel.BASIC)
+                    .setRequestInterceptor(requestInterceptor)
                     .build();
 
             pioApiService = restAdapter.create(PioApiService.class);

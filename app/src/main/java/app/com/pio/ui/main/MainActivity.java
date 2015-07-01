@@ -15,6 +15,7 @@ import android.widget.ListView;
 import com.crashlytics.android.Crashlytics;
 import com.squareup.picasso.Picasso;
 
+import app.com.pio.api.PioApiController;
 import app.com.pio.ui.map.MaskTileProvider;
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
+        PioApiController.initializeController(this);
         MVDatabase.initializeDatabase(this);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);

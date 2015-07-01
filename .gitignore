@@ -7,3 +7,5 @@
 /app/app.iml
 *.apk
 .idea/workspace.xml
+
+app/src/main/res/values/pio_api_keys.xml
