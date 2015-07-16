@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/prefs_string_beta_title"
+        android:key="pref_key_storage_settings">
+        <Preference
+            android:key="@string/prefs_key_beta_clear_stats"
+            android:summary="@string/prefs_string_beta_clear_stats_summary"
+            android:title="@string/prefs_string_beta_clear_stats_title"/>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -27,6 +27,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.settings.SettingsActivity"/>
+
         <service
             android:name=".service.LocationUpdateService"
             android:icon="@drawable/ic_launcher"

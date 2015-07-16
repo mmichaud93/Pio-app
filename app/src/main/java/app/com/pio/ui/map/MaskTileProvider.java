@@ -48,7 +48,8 @@ public class MaskTileProvider implements TileProvider {
 
     int bitmapWidth = 256;
     int bitmapHeight = 256;//0.0001
-    public static final double radiusConstant = 0.0001;// use 0.0000275 for no spacing between points
+    public static final double radiusConstant = 0.00015;// use 0.0000275 for no spacing between points
+//    public static final double radiusConstant = 0.0000275;// use 0.0000275 for no spacing between points
 
 //    int width = 180/4;
 //    int height = 180/4;
@@ -135,7 +136,7 @@ public class MaskTileProvider implements TileProvider {
 
                 // release the lock
                 lock = false;
-                Log.d("MaskTileProvider","time: "+(System.currentTimeMillis()-start)+", ps.size(): "+ps.size());
+//                Log.d("MaskTileProvider","time: "+(System.currentTimeMillis()-start)+", ps.size(): "+ps.size());
                 // return the tile
                 return tile;
             } catch(Exception e) {
