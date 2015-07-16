@@ -104,7 +104,7 @@ public class LocationUpdateService extends Service {
                 RecordUtil.setDistanceTravelled(RecordUtil.getDistanceTravelled() + distance);
                 Log.d("PIO", "distance: "+distance);
                 if (distance <= 0.001) {
-                    if (location.getSpeed() > 5) {
+                    if (location.getSpeed() > 10) {
                         for (int i = 0; i < speed; i++) {
                             registerLocationChange(new LatLng(
                                     (float) (previousLocation.getLatitude() + (location.getLatitude() - previousLocation.getLatitude()) / location.getSpeed() * i),
