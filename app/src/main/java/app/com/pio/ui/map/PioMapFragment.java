@@ -59,6 +59,12 @@ public class PioMapFragment extends Fragment {
 
     private static final String TAG = "PioMapFragment";
 
+    public static String KEY_RECORDING = "isRecording";
+    public static String KEY_LOCATION = "location";
+    public static String KEY_START_TIME = "startTime";
+    public static String KEY_STRENGTH = "strength";
+    public static String KEY_AREA = "area";
+
     View root;
     SupportMapFragment mapFragment;
     private GoogleMap googleMap;
@@ -89,14 +95,12 @@ public class PioMapFragment extends Fragment {
     @InjectView(R.id.map_dashboard_location)
     TextView locationText;
 
-    TimerTask timerTask;
-    Timer timer;
-
     DecimalFormat areaFormat = new DecimalFormat("#.###");
 
-    public static PioMapFragment newInstance() {
-
-        return new PioMapFragment();
+    public static PioMapFragment newInstance(Bundle args) {
+        PioMapFragment mapFragment = new PioMapFragment();
+        mapFragment.setArguments(args);
+        return mapFragment;
     }
 
     @Override
@@ -129,36 +133,19 @@ public class PioMapFragment extends Fragment {
                     if (RecordUtil.isRecording()) {
                         // stop recording
                         RecordUtil.stopRecording(getActivity());
-                        recordButton.setBackgroundResource(R.drawable.record_button_start);
-                        recordImage.setImageResource(R.drawable.ic_play);
-                        recordImage.setPadding((int) Util.dpToPx(5, getActivity()), 0, 0, 0);
+                        stopRecordingVisual();
                         slideDashboardDown();
                     } else {
                         // start recording
-                        RecordUtil.startRecording(getActivity());
-                        recordButton.setBackgroundResource(R.drawable.record_button_stop);
-                        recordImage.setImageResource(R.drawable.ic_stop);
-                        recordImage.setPadding(0, 0, 0, 0);
+                        RecordUtil.startRecording(getActivity(), dashboard);
+                        startRecordingVisuals();
                         sessionTime.setText(Util.formatLongToTime(0));
                         areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
-                        slideDashboardUp();
+                        slideDashboardUp(AnimUtil.animationSpeed);
                     }
                 }
             }
         });
-
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sessionTime.setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
-                    }
-                });
-            }
-        };
-        startTimer();
 
         geocoder = new Geocoder(getActivity(), Locale.getDefault());
 
@@ -168,50 +155,65 @@ public class PioMapFragment extends Fragment {
             public void onGpsStatusChanged(int i) {
                 if (getActivity() != null) {
                     if (i == GpsStatus.GPS_EVENT_STARTED) {
-                        recordButton.setBackgroundResource(R.drawable.record_button_start);
-                        recordImage.setImageResource(R.drawable.ic_play);
-                        recordImage.setPadding((int) Util.dpToPx(5, getActivity()), 0, 0, 0);
+                        if (RecordUtil.isRecording()) {
+                            startRecordingVisuals();
+                        } else {
+                            stopRecordingVisual();
+                        }
+
                     } else if (i == GpsStatus.GPS_EVENT_STOPPED) {
-                        recordButton.setBackgroundResource(R.drawable.record_button_warn);
-                        recordImage.setImageResource(R.drawable.ic_warning);
-                        recordImage.setPadding(0, 0, 0, 0);
+                        warnVisuals();
                     }
                 }
             }
         });
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            recordButton.setBackgroundResource(R.drawable.record_button_warn);
-            recordImage.setImageResource(R.drawable.ic_warning);
-            recordImage.setPadding(0, 0, 0, 0);
+            warnVisuals();
+        }
+
+        if(savedInstanceState!=null && savedInstanceState.getBoolean(KEY_RECORDING)) {
+            RecordUtil.startRecording(getActivity(), dashboard);
+            RecordUtil.setLocation(savedInstanceState.getString(KEY_LOCATION));
+            RecordUtil.setGpsStrength(savedInstanceState.getFloat(KEY_STRENGTH));
+            RecordUtil.setSessionTimeStart(savedInstanceState.getLong(KEY_START_TIME));
+            RecordUtil.setUncoveredKilometersSquared(savedInstanceState.getFloat(KEY_AREA));
+            startRecordingVisuals();
+            sessionTime.setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
+            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+            locationText.setText(RecordUtil.getLocation());
+            slideDashboardUp(0);
+        } else if(getArguments()!=null) {
+            RecordUtil.startRecording(getActivity(), dashboard);
+            RecordUtil.setLocation(getArguments().getString(KEY_LOCATION));
+            RecordUtil.setGpsStrength(getArguments().getFloat(KEY_STRENGTH));
+            RecordUtil.setSessionTimeStart(getArguments().getLong(KEY_START_TIME));
+            RecordUtil.setUncoveredKilometersSquared(getArguments().getFloat(KEY_AREA));
+            startRecordingVisuals();
+            sessionTime.setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
+            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+            locationText.setText(RecordUtil.getLocation());
+            slideDashboardUp(0);
         }
 
         return root;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
+    private void startRecordingVisuals() {
+        recordButton.setBackgroundResource(R.drawable.record_button_stop);
+        recordImage.setImageResource(R.drawable.ic_stop);
+        recordImage.setPadding(0, 0, 0, 0);
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-
+    private void stopRecordingVisual() {
+        recordButton.setBackgroundResource(R.drawable.record_button_start);
+        recordImage.setImageResource(R.drawable.ic_play);
+        recordImage.setPadding((int) Util.dpToPx(5, getActivity()), 0, 0, 0);
     }
 
-    private void startTimer() {
-        timer = new Timer();
-
-        timer.schedule(timerTask, 0, 1000); //
-    }
-
-    private void stopTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
+    private void warnVisuals() {
+        recordButton.setBackgroundResource(R.drawable.record_button_warn);
+        recordImage.setImageResource(R.drawable.ic_warning);
+        recordImage.setPadding(0, 0, 0, 0);
     }
 
     @Override
@@ -238,25 +240,60 @@ public class PioMapFragment extends Fragment {
         if (getActivity().getIntent().getExtras() != null && getActivity().getIntent().getExtras().containsKey(LocationUpdateService.SESSION_KEY)) {
             Bundle sessionData = getActivity().getIntent().getBundleExtra(LocationUpdateService.SESSION_KEY);
             float area = sessionData.getFloat(LocationUpdateService.AREA_KEY);
-            RecordUtil.startRecording(getActivity());
+            RecordUtil.startRecording(getActivity(), dashboard);
             RecordUtil.setUncoveredKilometersSquared(area);
             recordButton.setBackgroundResource(R.drawable.record_button_stop);
             recordImage.setImageResource(R.drawable.ic_stop);
             recordImage.setPadding(0, 0, 0, 0);
             sessionTime.setText(Util.formatLongToTime(0));
             areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
-            slideDashboardUp();
+            slideDashboardUp(0);
             getActivity().getIntent().getExtras().clear();
         }
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        stopTimer();
-        RecordUtil.stopRecording(getActivity());
+
+        // the fragment is on it's way out, so create the service
+        //stopTimer();
+        //RecordUtil.stopRecording(getActivity());
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+
+        savedInstanceState.putBoolean(KEY_RECORDING, RecordUtil.isRecording());
+        if (RecordUtil.isRecording()) {
+            savedInstanceState.putLong(KEY_START_TIME, RecordUtil.getSessionTimeStart());
+            savedInstanceState.putString(KEY_LOCATION, RecordUtil.getLocation());
+            savedInstanceState.putFloat(KEY_AREA, RecordUtil.getUncoveredKilometersSquared());
+            savedInstanceState.putFloat(KEY_STRENGTH, RecordUtil.getGpsStrength());
+        }
+
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
     LatLng firstLatLng = null;
+    long getLocationTime = 0;
     private void setUpMap() {
         if (googleMap != null) {
             googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -294,6 +331,7 @@ public class PioMapFragment extends Fragment {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(location.getLatitude(), location.getLongitude()), 16));
             }
+
             googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
                 @Override
                 public void onMyLocationChange(Location location) {
@@ -326,16 +364,21 @@ public class PioMapFragment extends Fragment {
 
                             List<Address> addresses;
 
-                            try {
-                                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                if (addresses.size() > 0) {
-                                    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                    locationText.setText(address);
-                                } else {
-                                    locationText.setText(getString(R.string.unknown));
+                            if (getLocationTime < System.currentTimeMillis()) {
+                                try {
+                                    addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                    if (addresses.size() > 0) {
+                                        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                                        locationText.setText(address);
+                                        RecordUtil.setLocation(address);
+                                    } else {
+                                        locationText.setText(getString(R.string.unknown));
+                                        RecordUtil.setLocation(getString(R.string.unknown));
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    getLocationTime = System.currentTimeMillis()+15000;
                                 }
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
 
                             areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
@@ -357,7 +400,7 @@ public class PioMapFragment extends Fragment {
 
     }
 
-    private void slideDashboardUp() {
+    private void slideDashboardUp(final int speed) {
 
         if(root.getHeight()==0) {
             Handler handler = new Handler();
@@ -368,7 +411,7 @@ public class PioMapFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                slideDashboardUp();
+                                slideDashboardUp(speed);
                             }
                         });
                     }
@@ -385,8 +428,8 @@ public class PioMapFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animator animator) {
                     dashboard.setAlpha(1);
-                    dashboard.animate().y(root.getHeight() - Util.dpToPx(96, getActivity())).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeed).setListener(AnimUtil.blankAnimationListener).start();
-                    record.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(AnimUtil.animationSpeed).y(root.getHeight() - Util.dpToPx(142, getActivity())).start();
+                    dashboard.animate().y(root.getHeight() - Util.dpToPx(96, getActivity())).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(speed).setListener(AnimUtil.blankAnimationListener).start();
+                    record.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(speed).y(root.getHeight() - Util.dpToPx(142, getActivity())).start();
                 }
 
                 @Override

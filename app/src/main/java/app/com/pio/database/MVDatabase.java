@@ -83,7 +83,7 @@ public class MVDatabase {
                     valueType(StringDataType.INSTANCE));
         }
         if(!mvrTreeMap.isClosed()) {
-            Log.d("MVDatabase", "storing point, x: " + x + ", y: " + y);
+            //Log.d("MVDatabase", "storing point, x: " + x + ", y: " + y);
             mvrTreeMap.add(new SpatialKey((long) (Math.random() * Long.MAX_VALUE), x, x, y, y), "(" + x + ", " + y + ")");
         }
         return true;

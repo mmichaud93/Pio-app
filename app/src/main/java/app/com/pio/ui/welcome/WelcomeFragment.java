@@ -309,9 +309,9 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                             if (pioApiResponse.getMsg().equals("true")) {
                                 // login success
                                 // TODO: I dont know what else we need to do here
-                                PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
-                                PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
-                                PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
 
                                 ((MainActivity) getActivity()).initRegularApp(null);
                                 getActivity().supportInvalidateOptionsMenu();
@@ -331,9 +331,9 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
         } else {
             // new user
 
-            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
-            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
-            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
+            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
+            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
+            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
 
             PioApiController.sendNewUser(getActivity(), emailEditEmail.getText().toString(),
                     emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), new Callback<PioApiResponse>() {
@@ -391,9 +391,9 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                         if (pioApiResponse.getMsg().equals("true")) {
                                             // login success
                                             // TODO: I dont know what else we need to do here
-                                            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
-                                            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
-                                            PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
+                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
+                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
+                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
 
                                             ((MainActivity) getActivity()).initRegularApp(null);
                                             getActivity().supportInvalidateOptionsMenu();
@@ -416,9 +416,9 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
                                         loading.setVisibility(View.GONE);
-                                        PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
-                                        PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
-                                        PrefUtil.savePrefs(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
+                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
+                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
+                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
 
                                         if (pioApiResponse.getCode() == 200) {
                                             ((MainActivity) getActivity()).initRegularApp(null);

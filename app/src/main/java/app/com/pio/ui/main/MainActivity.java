@@ -13,10 +13,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.crashlytics.android.Crashlytics;
-import com.squareup.picasso.Picasso;
 
 import app.com.pio.api.PioApiController;
-import app.com.pio.ui.map.MaskTileProvider;
+import app.com.pio.ui.map.RecordUtil;
+import app.com.pio.ui.settings.SettingsActivity;
+import app.com.pio.ui.stats.StatsFragment;
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
@@ -59,7 +60,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         ButterKnife.inject(this);
         setSupportActionBar(toolbar);
 
-        if(PrefUtil.getStringPrefs(this, PrefUtil.PREFS_LOGIN_TYPE_KEY, null) == null) {
+        if(PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_TYPE_KEY, null) == null) {
             // we need to login
             initLogin(savedInstanceState);
         } else {
@@ -90,7 +91,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, PioMapFragment.newInstance())
+                    .replace(R.id.container, PioMapFragment.newInstance(null))
                     .commit();
         }
 
@@ -144,6 +145,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -166,7 +169,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 break;
             case 1: // map
                 cleanActionBar();
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, PioMapFragment.newInstance()).commit();
+                Bundle args = new Bundle();
+                if(RecordUtil.isRecording()) {
+                    args.putFloat(PioMapFragment.KEY_STRENGTH, RecordUtil.getGpsStrength());
+                    args.putFloat(PioMapFragment.KEY_AREA, RecordUtil.getUncoveredKilometersSquared());
+                    args.putString(PioMapFragment.KEY_LOCATION, RecordUtil.getLocation());
+                    args.putBoolean(PioMapFragment.KEY_RECORDING, RecordUtil.isRecording());
+                    args.putLong(PioMapFragment.KEY_START_TIME, RecordUtil.getSessionTimeStart());
+                } else {
+                    args = null;
+                }
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, PioMapFragment.newInstance(args)).commit();
                 drawerLayout.closeDrawers();
                 break;
             case 2: // achievements
@@ -175,6 +188,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 break;
             case 3: // stats
                 cleanActionBar();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, StatsFragment.newInstance()).commit();
                 drawerLayout.closeDrawers();
                 break;
         }

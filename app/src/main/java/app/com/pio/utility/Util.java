@@ -3,6 +3,8 @@ package app.com.pio.utility;
 import android.app.Activity;
 import android.content.Context;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,5 +77,21 @@ public class Util {
             return false;
         }
 
+    }
+
+    public static float distanceLatLng(LatLng latLngA, LatLng latLngB)
+    {
+        double earthRadius = 3958.75;
+        double latDiff = Math.toRadians(latLngB.latitude-latLngA.latitude);
+        double lngDiff = Math.toRadians(latLngB.longitude-latLngA.longitude);
+        double a = Math.sin(latDiff /2) * Math.sin(latDiff /2) +
+                Math.cos(Math.toRadians(latLngA.latitude)) * Math.cos(Math.toRadians(latLngB.latitude)) *
+                        Math.sin(lngDiff /2) * Math.sin(lngDiff /2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double distance = earthRadius * c;
+
+        int meterConversion = 1609;
+
+        return new Float(distance * meterConversion).floatValue();
     }
 }

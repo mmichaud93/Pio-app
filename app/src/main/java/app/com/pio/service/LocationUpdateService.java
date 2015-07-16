@@ -12,13 +12,18 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DecimalFormat;
 
 import app.com.pio.R;
 import app.com.pio.database.MVDatabase;
 import app.com.pio.ui.main.MainActivity;
+import app.com.pio.ui.map.MaskTileProvider;
 import app.com.pio.ui.map.RecordUtil;
+import app.com.pio.utility.Util;
 
 /**
  * Created by mmichaud on 6/14/15.
@@ -34,6 +39,8 @@ public class LocationUpdateService extends Service {
     public static String SESSION_KEY = "session";
 
     DecimalFormat areaFormat = new DecimalFormat("#.###");
+
+    Location previousLocation;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -82,7 +89,42 @@ public class LocationUpdateService extends Service {
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            registerLocationChange(location);
+            //Log.d("PIO-LocUpdateService", "location.speed: " + location.getSpeed());
+            int speed = (int) (location.getSpeed()+1);
+
+
+//                    (float) Math.sqrt((previousLocation.getLatitude()-location.getLatitude())*(previousLocation.getLatitude()-location.getLatitude())+
+//                    ( previousLocation.getLongitude()-location.getLongitude())*(previousLocation.getLongitude()-location.getLongitude()));
+            RecordUtil.setSpeed(speed);
+            if(previousLocation != null) {
+                float distance = Util.distanceLatLng(
+                        new LatLng(previousLocation.getLatitude(), previousLocation.getLongitude()),
+                        new LatLng(location.getLatitude(), location.getLongitude()));
+
+                RecordUtil.setDistanceTravelled(RecordUtil.getDistanceTravelled() + distance);
+                Log.d("PIO", "distance: "+distance);
+                if (distance <= 0.001) {
+                    if (location.getSpeed() > 5) {
+                        for (int i = 0; i < speed; i++) {
+                            registerLocationChange(new LatLng(
+                                    (float) (previousLocation.getLatitude() + (location.getLatitude() - previousLocation.getLatitude()) / location.getSpeed() * i),
+                                    (float) (previousLocation.getLongitude() + (location.getLongitude() - previousLocation.getLongitude()) / location.getSpeed() * i)
+                            ));
+                        }
+                    } else {
+                        registerLocationChange(location);
+                    }
+
+
+                } else {
+                    registerLocationChange(location);
+                }
+            } else {
+                registerLocationChange(location);
+            }
+
+
+            previousLocation = location;
         }
 
         @Override
@@ -102,7 +144,11 @@ public class LocationUpdateService extends Service {
     };
 
     public void registerLocationChange(Location location) {
-        if (MVDatabase.storePoint((float) location.getLatitude(), (float) location.getLongitude(), true)) {
+        registerLocationChange(new LatLng(location.getLatitude(), location.getLongitude()));
+    }
+
+    public void registerLocationChange(LatLng latLng) {
+        if (MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude, true)) {
             float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
             RecordUtil.recordPoint(uncoveredArea);
             kiloSquared += uncoveredArea;

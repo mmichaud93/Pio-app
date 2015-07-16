@@ -11,12 +11,36 @@
     <string name="gps_strength">GPS Strength</string>
     <string name="location">Location</string>
     <string name="unknown">unknown</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
 
     <string name="service_ticker">Beginning your journey!</string>
     <string name="service_title">Exploring the world...</string>
     <string name="service_text">%skm² this session</string>
     <string name="area_km">%s km²</string>
+    <string name="stats_total_area_text">Total area uncovered: %s</string>
+    <string name="stats_total_time_text">Total time spent exploring: %s</string>
+    <string name="stats_speed_text">Current speed: %s</string>
+    <string name="stats_number_of_points_text">Number of points: %s</string>
+    <string name="stats_distance_text">Distance travelled: %s</string>
+    <string name="stats_total_distance_text">Total distance travelled: %s</string>
 
+    <!-- preferences -->
+    <string name="prefs_string_beta_title">Beta</string>
+    <string name="prefs_string_beta_clear_stats_summary">This is non-reversible</string>
+    <string name="prefs_string_beta_clear_stats_title">Clear stats</string>
+    <string name="prefs_key_beta_clear_stats">prefs_key_beta_clear_stats</string>
+
+    <!-- Are You Sure? -->
+    <string name="are_you_sure_title">Are you sure?</string>
+    <string name="are_you_sure_subtitle">Slide the slider to full to confirm</string>
+
+    <!--  Strings for possible PreferenceActivity Back/Next buttons -->
+    <string name="back_button_label">Back</string>
+    <string name="next_button_label">Next</string>
+
+    <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
+    <string name="skip_button_label">Skip</string>
 
     <!--
         Nav Bar items
