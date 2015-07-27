@@ -30,8 +30,10 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
 import app.com.pio.R;
+import app.com.pio.api.ProfileResponse;
 import app.com.pio.api.PioApiController;
 import app.com.pio.api.PioApiResponse;
+import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.models.WelcomePageModel;
 import app.com.pio.ui.main.MainActivity;
 import app.com.pio.utility.AnimUtil;
@@ -302,13 +304,14 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
         if (isLoggingIn) {
             // check password
             PioApiController.loginUser(getActivity(), emailEditEmail.getText().toString(),
-                    emailEditPassword.getText().toString(), new Callback<PioApiResponse>() {
+                    emailEditPassword.getText().toString(), new Callback<ProfileResponse>() {
                         @Override
-                        public void success(PioApiResponse pioApiResponse, Response response) {
+                        public void success(ProfileResponse profileResponse, Response response) {
                             loading.setVisibility(View.GONE);
-                            if (pioApiResponse.getMsg().equals("true")) {
+                            if (profileResponse.getMsg().equals("true")) {
                                 // login success
                                 // TODO: I dont know what else we need to do here
+                                ProfileManager.activeProfile = profileResponse.getProfile();
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
@@ -383,14 +386,15 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                         public void success(PioApiResponse pioApiResponse, Response response) {
                             if (pioApiResponse.getMsg().equals("true")) {
                                 // email exists, try to login
-                                PioApiController.loginUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), new Callback<PioApiResponse>() {
+                                PioApiController.loginUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), new Callback<ProfileResponse>() {
                                     @Override
-                                    public void success(PioApiResponse pioApiResponse, Response response) {
+                                    public void success(ProfileResponse profileResponse, Response response) {
                                         loading.setVisibility(View.GONE);
 
-                                        if (pioApiResponse.getMsg().equals("true")) {
+                                        if (profileResponse.getMsg().equals("true")) {
                                             // login success
                                             // TODO: I dont know what else we need to do here
+                                            ProfileManager.activeProfile = profileResponse.getProfile();
                                             PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
                                             PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
                                             PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());

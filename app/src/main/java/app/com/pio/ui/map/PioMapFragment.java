@@ -33,6 +33,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 
@@ -45,12 +46,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import app.com.pio.R;
+import app.com.pio.api.PioApiController;
+import app.com.pio.api.PioApiResponse;
 import app.com.pio.database.MVDatabase;
+import app.com.pio.features.monuments.MonumentManager;
+import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.service.LocationUpdateService;
+import app.com.pio.ui.monuments.CityItem;
+import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.utility.AnimUtil;
 import app.com.pio.utility.Util;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by mmichaud on 5/22/15.
@@ -396,6 +406,14 @@ public class PioMapFragment extends Fragment {
             opts.tileProvider(tileProvider);
             // Add the tile overlay to the map.
             overlay = googleMap.addTileOverlay(opts);
+
+            for(CityItem city : MonumentManager.cities) {
+                for(MonumentItem monument: city.getMonumentItems()) {
+                    googleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(monument.getPinLat(), monument.getPinLong()))
+                            .title(monument.getName()));
+                }
+            }
         }
 
     }

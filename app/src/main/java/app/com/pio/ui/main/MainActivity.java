@@ -5,6 +5,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,8 +15,13 @@ import android.widget.ListView;
 
 import com.crashlytics.android.Crashlytics;
 
+import app.com.pio.api.PioApiResponse;
+import app.com.pio.api.ProfileResponse;
 import app.com.pio.api.PioApiController;
+import app.com.pio.features.monuments.MonumentManager;
+import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.ui.map.RecordUtil;
+import app.com.pio.ui.monuments.MonumentsFragment;
 import app.com.pio.ui.settings.SettingsActivity;
 import app.com.pio.ui.stats.StatsFragment;
 import io.fabric.sdk.android.Fabric;
@@ -33,6 +39,9 @@ import app.com.pio.ui.profile.PioProfileFragment;
 import app.com.pio.utility.PrefUtil;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,
@@ -56,11 +65,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         Fabric.with(this, new Crashlytics());
         PioApiController.initializeController(this);
         MVDatabase.initializeDatabase(this);
+        MonumentManager.initializeMonuments(this);
+        ProfileManager.loadActiveProfile(getApplicationContext());
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         setSupportActionBar(toolbar);
 
-        if(PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_TYPE_KEY, null) == null) {
+        if(PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_TYPE_KEY, null) == null ||
+                PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_EMAIL_KEY, null) == null ||
+                PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_PASSWORD_KEY, null) == null) {
             // we need to login
             initLogin(savedInstanceState);
         } else {
@@ -124,7 +137,49 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         drawerList.setAdapter(new DrawerAdapter(this, items));
         drawerList.setOnItemClickListener(this);
 
+        // login in the background
+        PioApiController.loginUser(this,
+                PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_EMAIL_KEY, null),
+                PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_PASSWORD_KEY, null),
+                new Callback<ProfileResponse>() {
+                    @Override
+                    public void success(ProfileResponse profileResponse, Response response) {
+                        Log.d("PIO", "[MainActivity] successfully logged in!");
+                        if (profileResponse.getProfile()==null) {
+                            return;
+                        }
+                        if (ProfileManager.activeProfile == null) {
+                            ProfileManager.activeProfile = profileResponse.getProfile();
+                            ProfileManager.saveActiveProfile();
+                        } else {
+                            if (profileResponse.getProfile().getLastUpdated() > ProfileManager.activeProfile.getLastUpdated()) {
+                                ProfileManager.activeProfile = profileResponse.getProfile();
+                                ProfileManager.saveActiveProfile();
+                            } else {
+                                // the profile item on the server is out of data and we need to push the local copy to the server,
+                                // this will happen a very large majority of the time
+                                PioApiController.pushUser(ProfileManager.activeProfile, new Callback<PioApiResponse>() {
+                                    @Override
+                                    public void success(PioApiResponse pioApiResponse, Response response) {
 
+                                    }
+
+                                    @Override
+                                    public void failure(RetrofitError error) {
+                                        Log.d("PIO", "[MainActivity] could not push profile to server");
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        Log.d("PIO", "[MainActivity] could not log in! Requiring a log in next time.");
+                        //PrefUtil.savePref(MainActivity.this, PrefUtil.PREFS_LOGIN_EMAIL_KEY, null);
+                        //PrefUtil.savePref(MainActivity.this, PrefUtil.PREFS_LOGIN_PASSWORD_KEY, null);
+                    }
+                });
     }
 
 
@@ -182,8 +237,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, PioMapFragment.newInstance(args)).commit();
                 drawerLayout.closeDrawers();
                 break;
-            case 2: // achievements
+            case 2: // monumnets
                 cleanActionBar();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, MonumentsFragment.newInstance()).commit();
                 drawerLayout.closeDrawers();
                 break;
             case 3: // stats

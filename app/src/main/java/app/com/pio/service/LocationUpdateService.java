@@ -20,9 +20,12 @@ import java.text.DecimalFormat;
 
 import app.com.pio.R;
 import app.com.pio.database.MVDatabase;
+import app.com.pio.features.monuments.MonumentManager;
+import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.ui.main.MainActivity;
 import app.com.pio.ui.map.MaskTileProvider;
 import app.com.pio.ui.map.RecordUtil;
+import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.utility.Util;
 
 /**
@@ -33,6 +36,7 @@ public class LocationUpdateService extends Service {
     private boolean started = false;
     LocationManager locationManager;
     private int NOTIFICATION_ID = 0;
+    private int NOTIFICATION_MONUMENT_ID = 1;
     float kiloSquared = 0;
 
     public static String AREA_KEY = "area";
@@ -86,6 +90,32 @@ public class LocationUpdateService extends Service {
         return builder.build();
     }
 
+    private Notification buildMonumentNotification(MonumentItem monumentItem) {
+        Notification.Builder builder = new Notification.Builder(getApplicationContext());
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+
+        Bundle sessionData = new Bundle();
+        sessionData.putString("monument_id", monumentItem.getId());
+        resultIntent.putExtra("monument_key", sessionData);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        builder.setContentIntent(resultPendingIntent).setSmallIcon(monumentItem.getBitmapUnlocked())
+                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), monumentItem.getBitmapUnlocked()))
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true)
+                .setContentTitle("Unlocked a new Monument!")
+                .setContentText(monumentItem.getName())
+                .setOngoing(false);
+        return builder.build();
+    }
+
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
@@ -102,7 +132,7 @@ public class LocationUpdateService extends Service {
                         new LatLng(location.getLatitude(), location.getLongitude()));
 
                 RecordUtil.setDistanceTravelled(RecordUtil.getDistanceTravelled() + distance);
-                Log.d("PIO", "distance: "+distance);
+
                 if (distance <= 0.001) {
                     if (location.getSpeed() > 10) {
                         for (int i = 0; i < speed; i++) {
@@ -148,13 +178,20 @@ public class LocationUpdateService extends Service {
     }
 
     public void registerLocationChange(LatLng latLng) {
+        MonumentItem monumentItem = MonumentManager.isInGeoFence(latLng);
+        if(monumentItem != null) {
+            // unlocked a monument
+            Log.d("PIO", "[LocationUpdateService] unlocked monument "+monumentItem.getName());
+            monumentItem.setIsUnlocked(true);
+            ProfileManager.activeProfile.addMonument(monumentItem.getId());
+            NotificationManager notificationManager = (NotificationManager) getApplicationContext()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(NOTIFICATION_MONUMENT_ID, buildMonumentNotification(monumentItem));
+        }
         if (MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude, true)) {
             float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
             RecordUtil.recordPoint(uncoveredArea);
             kiloSquared += uncoveredArea;
-            NotificationManager notificationManager = (NotificationManager) getApplicationContext()
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(NOTIFICATION_ID, buildNotification());
         }
 
     }

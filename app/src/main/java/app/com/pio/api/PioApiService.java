@@ -1,7 +1,10 @@
 package app.com.pio.api;
 
+import app.com.pio.models.ProfileModel;
 import retrofit.Callback;
+import retrofit.http.Body;
 import retrofit.http.GET;
+import retrofit.http.POST;
 import retrofit.http.Query;
 
 /**
@@ -22,5 +25,8 @@ public interface PioApiService {
     public void loginUser(@Query("email") String email, @Query("pass") String pass,
                           @Query("device_name") String name, @Query("device_os") String deviceOs, @Query("device_app_ver") String deviceAppVer,
                           @Query("device_screen_width") int width, @Query("device_screen_height") int height, @Query("device_screen_ppi") float ppi,
-                          Callback<PioApiResponse> callback);
+                          Callback<ProfileResponse> callback);
+
+    @POST("/users/push")
+    public void pushUser(@Body ProfileModel profile, Callback<PioApiResponse> callback);
 }

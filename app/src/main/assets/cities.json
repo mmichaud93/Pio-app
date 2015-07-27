@@ -1,0 +1,70 @@
+{
+  "cities" : [
+    {
+      "name": "Boston",
+      "monument_count": 4,
+      "monuments": [
+        {
+          "id": "old_north_church_bos",
+          "name": "Old North Church",
+          "location": "Boston, MA",
+          "pin": {
+            "lat": 42.366303, 
+            "lon": -71.054404,
+            "radius": 20
+          },
+          "bitmap_locked": "old_north_church_bw",
+          "bitmap_unlocked": "old_north_church"
+        }, 
+        {
+          "id": "fenway_park_bos",
+          "name": "Fenway Park",
+          "location": "Boston, MA",
+          "pin": {
+            "lat": 42.346648, 
+            "lon": -71.097209,
+            "radius": 130
+          },
+          "bitmap_locked": "fenway_park_bw",
+          "bitmap_unlocked": "fenway_park"
+        }, 
+        {
+          "id": "uss_constitution_bos",
+          "name": "USS Constitution",
+          "location": "Charlestown, MA",
+          "pin": {
+            "lat": 42.372481, 
+            "lon": -71.056616,
+            "radius": 80
+          },
+          "bitmap_locked": "uss_constitution_bw",
+          "bitmap_unlocked": "uss_constitution"
+        }, 
+        {
+          "id": "mit_bos",
+          "name": "MIT",
+          "location": "Cambridge, MA",
+          "pin": {
+            "lat": 42.360004, 
+            "lon": -71.094291,
+            "radius": 300
+          },
+          "bitmap_locked": "mit_bw",
+          "bitmap_unlocked": "mit"
+        },
+        {
+          "id": "wit_bos",
+          "name": "Wentworth",
+          "location": "Boston, MA",
+          "pin": {
+            "lat": 42.336124, 
+            "lon": -71.095298,
+            "radius": 35
+          },
+          "bitmap_locked": "mit_bw",
+          "bitmap_unlocked": "mit"
+        }
+      ]
+    } 
+  ]
+}

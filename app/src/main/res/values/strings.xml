@@ -47,7 +47,7 @@
     -->
     <string-array name="nav_bar_items">
         <item>Map</item>
-        <item>Achievements</item>
+        <item>Monuments</item>
         <item>Stats</item>
     </string-array>
 </resources>

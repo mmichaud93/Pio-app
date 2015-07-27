@@ -5,6 +5,8 @@ import android.content.Context;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,5 +95,21 @@ public class Util {
         int meterConversion = 1609;
 
         return new Float(distance * meterConversion).floatValue();
+    }
+
+    public static String loadJSONFromAsset(Context context, String filename) {
+        String json = null;
+        try {
+            InputStream is = context.getAssets().open(filename);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
     }
 }

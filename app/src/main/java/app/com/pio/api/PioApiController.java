@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Display;
 
 import app.com.pio.R;
+import app.com.pio.models.ProfileModel;
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
@@ -32,7 +33,7 @@ public class PioApiController {
             };
             RestAdapter restAdapter = new RestAdapter.Builder()
                     .setEndpoint(context.getString(R.string.pio_api_url_prod))
-                    .setLogLevel(RestAdapter.LogLevel.BASIC)
+                    .setLogLevel(RestAdapter.LogLevel.FULL)
                     .setRequestInterceptor(requestInterceptor)
                     .build();
 
@@ -58,7 +59,7 @@ public class PioApiController {
         pioApiService.userExist(email, callback);
     }
 
-    public static void loginUser(Activity activity, String email, String pass, Callback<PioApiResponse> callback) {
+    public static void loginUser(Activity activity, String email, String pass, Callback<ProfileResponse> callback) {
         Display display = activity.getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -69,5 +70,9 @@ public class PioApiController {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void pushUser(ProfileModel profile, Callback<PioApiResponse> callback) {
+        pioApiService.pushUser(profile, callback);
     }
 }

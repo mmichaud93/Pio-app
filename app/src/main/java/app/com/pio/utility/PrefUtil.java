@@ -6,6 +6,8 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
+import java.util.Set;
+
 /**
  * Created by mmichaud on 5/28/15.
  */
@@ -39,6 +41,21 @@ public class PrefUtil {
         prefs.edit().putLong(key, value).apply();
     }
 
+    public static void savePref(Context context, String key, boolean value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(key, value).apply();
+    }
+
+    public static void savePref(Context context, String key, int value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putInt(key, value).apply();
+    }
+
+    public static void savePref(Context context, String key, Set<String> value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putStringSet(key, value).apply();
+    }
+
     public static String getPref(Context context, String key, String defaultValue) {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         try {
@@ -66,6 +83,39 @@ public class PrefUtil {
         try {
             //Log.d("PIO", "loaded: "+sharedPrefs.getString(key, defaultValue)+", decrpyt: "+decryptText(sharedPrefs.getString(key, defaultValue)));
             return sharedPrefs.getLong(key, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    public static boolean getPref(Context context, String key, boolean defaultValue) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        try {
+            //Log.d("PIO", "loaded: "+sharedPrefs.getString(key, defaultValue)+", decrpyt: "+decryptText(sharedPrefs.getString(key, defaultValue)));
+            return sharedPrefs.getBoolean(key, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    public static int getPref(Context context, String key, int defaultValue) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        try {
+            //Log.d("PIO", "loaded: "+sharedPrefs.getString(key, defaultValue)+", decrpyt: "+decryptText(sharedPrefs.getString(key, defaultValue)));
+            return sharedPrefs.getInt(key, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    public static Set<String> getPrefSet(Context context, String key, Set<String> defaultValue) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        try {
+            //Log.d("PIO", "loaded: "+sharedPrefs.getString(key, defaultValue)+", decrpyt: "+decryptText(sharedPrefs.getString(key, defaultValue)));
+            return sharedPrefs.getStringSet(key, defaultValue);
         } catch (Exception e) {
             e.printStackTrace();
             return defaultValue;
