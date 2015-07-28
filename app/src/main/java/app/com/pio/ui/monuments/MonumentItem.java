@@ -17,19 +17,27 @@ public class MonumentItem implements Serializable {
 
     boolean isUnlocked;
 
-    int bitmapLocked;
-    int bitmapUnlocked;
+    int bitmapLockedLarge;
+    int bitmapUnlockedLarge;
+    int bitmapLockedMed;
+    int bitmapUnlockedMed ;
+    int bitmapLockedSmall;
+    int bitmapUnlockedSmall;
 
     double pinLat;
     double pinLong;
     double radius;
 
-    public MonumentItem(String id, String name, String location, int bitmapLocked, int bitmapUnlocked, double pinLat, double pinLong, double radius) {
+    public MonumentItem(String id, String name, String location, int bitmapLockedLarge, int bitmapUnlockedLarge, int bitmapLockedMed, int bitmapUnlockedMed, int bitmapLockedSmall, int bitmapUnlockedSmall, double pinLat, double pinLong, double radius) {
         this.id = id;
         this.name = name;
         this.location = location;
-        this.bitmapLocked = bitmapLocked;
-        this.bitmapUnlocked = bitmapUnlocked;
+        this.bitmapLockedLarge = bitmapLockedLarge;
+        this.bitmapUnlockedLarge = bitmapUnlockedLarge;
+        this.bitmapLockedMed = bitmapLockedMed;
+        this.bitmapUnlockedMed = bitmapUnlockedMed;
+        this.bitmapLockedSmall = bitmapLockedSmall;
+        this.bitmapUnlockedSmall = bitmapUnlockedSmall;
         this.pinLat = pinLat;
         this.pinLong = pinLong;
         this.radius = radius;
@@ -51,20 +59,52 @@ public class MonumentItem implements Serializable {
         this.location = location;
     }
 
-    public int getBitmapLocked() {
-        return bitmapLocked;
+    public int getBitmapLockedLarge() {
+        return bitmapLockedLarge;
     }
 
-    public void setBitmapLocked(int bitmapLocked) {
-        this.bitmapLocked = bitmapLocked;
+    public void setBitmapLockedLarge(int bitmapLockedLarge) {
+        this.bitmapLockedLarge = bitmapLockedLarge;
     }
 
-    public int getBitmapUnlocked() {
-        return bitmapUnlocked;
+    public int getBitmapUnlockedLarge() {
+        return bitmapUnlockedLarge;
     }
 
-    public void setBitmapUnlocked(int bitmapUnlocked) {
-        this.bitmapUnlocked = bitmapUnlocked;
+    public void setBitmapUnlockedLarge(int bitmapUnlockedLarge) {
+        this.bitmapUnlockedLarge = bitmapUnlockedLarge;
+    }
+
+    public int getBitmapLockedMed() {
+        return bitmapLockedMed;
+    }
+
+    public void setBitmapLockedMed(int bitmapLockedMed) {
+        this.bitmapLockedMed = bitmapLockedMed;
+    }
+
+    public int getBitmapUnlockedMed() {
+        return bitmapUnlockedMed;
+    }
+
+    public void setBitmapUnlockedMed(int bitmapUnlockedMed) {
+        this.bitmapUnlockedMed = bitmapUnlockedMed;
+    }
+
+    public int getBitmapLockedSmall() {
+        return bitmapLockedSmall;
+    }
+
+    public void setBitmapLockedSmall(int bitmapLockedSmall) {
+        this.bitmapLockedSmall = bitmapLockedSmall;
+    }
+
+    public int getBitmapUnlockedSmall() {
+        return bitmapUnlockedSmall;
+    }
+
+    public void setBitmapUnlockedSmall(int bitmapUnlockedSmall) {
+        this.bitmapUnlockedSmall = bitmapUnlockedSmall;
     }
 
     public double getPinLat() {

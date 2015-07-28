@@ -106,8 +106,8 @@ public class LocationUpdateService extends Service {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
-        builder.setContentIntent(resultPendingIntent).setSmallIcon(monumentItem.getBitmapUnlocked())
-                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), monumentItem.getBitmapUnlocked()))
+        builder.setContentIntent(resultPendingIntent).setSmallIcon(monumentItem.getBitmapUnlockedSmall())
+                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), monumentItem.getBitmapUnlockedSmall()))
                 .setWhen(System.currentTimeMillis())
                 .setAutoCancel(true)
                 .setContentTitle("Unlocked a new Monument!")

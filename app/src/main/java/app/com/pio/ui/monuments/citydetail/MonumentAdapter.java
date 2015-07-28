@@ -41,9 +41,9 @@ public class MonumentAdapter extends ArrayAdapter<MonumentItem> {
         }
 
         if(ProfileManager.monumentIsUnlocked(item.getId())) {
-            viewHolder.vMonumentImage.setImageResource(item.getBitmapUnlocked());
+            viewHolder.vMonumentImage.setImageResource(item.getBitmapUnlockedMed());
         } else {
-            viewHolder.vMonumentImage.setImageResource(item.getBitmapLocked());
+            viewHolder.vMonumentImage.setImageResource(item.getBitmapLockedMed());
         }
         viewHolder.vMonumentName.setText(item.getName());
         viewHolder.vMonumentLocation.setText(item.getLocation());

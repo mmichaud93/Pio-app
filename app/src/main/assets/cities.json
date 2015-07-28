@@ -51,18 +51,6 @@
           },
           "bitmap_locked": "mit_bw",
           "bitmap_unlocked": "mit"
-        },
-        {
-          "id": "wit_bos",
-          "name": "Wentworth",
-          "location": "Boston, MA",
-          "pin": {
-            "lat": 42.336124, 
-            "lon": -71.095298,
-            "radius": 35
-          },
-          "bitmap_locked": "mit_bw",
-          "bitmap_unlocked": "mit"
         }
       ]
     } 

@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Criteria;
@@ -32,13 +34,17 @@ import android.widget.TextView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -342,6 +348,25 @@ public class PioMapFragment extends Fragment {
                         new LatLng(location.getLatitude(), location.getLongitude()), 16));
             }
 
+            googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+                @Override
+                public void onCameraChange(CameraPosition cameraPosition) {
+                    if(cameraPosition.zoom < 10 && markersShown) {
+                        markersShown = false;
+                        for(Marker marker : markers) {
+                            marker.setVisible(false);
+                        }
+                    } else if(cameraPosition.zoom >= 10 && !markersShown) {
+                        markersShown = true;
+                        for(Marker marker : markers) {
+                            marker.setVisible(true);
+                        }
+                    }
+
+
+                }
+            });
+
             googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
                 @Override
                 public void onMyLocationChange(Location location) {
@@ -409,14 +434,24 @@ public class PioMapFragment extends Fragment {
 
             for(CityItem city : MonumentManager.cities) {
                 for(MonumentItem monument: city.getMonumentItems()) {
-                    googleMap.addMarker(new MarkerOptions()
+                    int iconRes = monument.getBitmapLockedSmall();
+                    if(ProfileManager.monumentIsUnlocked(monument.getId())) {
+                        iconRes = monument.getBitmapUnlockedSmall();
+                    }
+                    Bitmap bm = BitmapFactory.decodeResource(getResources(), iconRes);
+                    MarkerOptions marker = new MarkerOptions()
                             .position(new LatLng(monument.getPinLat(), monument.getPinLong()))
-                            .title(monument.getName()));
+                            .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bm, (int)Util.dpToPx(48, getActivity()), (int)Util.dpToPx(48, getActivity()), false)))
+                            .title(monument.getName());
+                    markers.add(googleMap.addMarker(marker));
                 }
             }
         }
 
     }
+
+    ArrayList<Marker> markers = new ArrayList<>();
+    boolean markersShown = true;
 
     private void slideDashboardUp(final int speed) {
 
