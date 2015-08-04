@@ -36,6 +36,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -106,8 +107,10 @@ public class PioMapFragment extends Fragment {
     View bar4;
     @InjectView(R.id.map_dashboard_session_time)
     TextView sessionTime;
-    @InjectView(R.id.map_dashboard_area)
-    TextView areaText;
+    //    @InjectView(R.id.map_dashboard_area)
+//    TextView areaText;
+    @InjectView(R.id.map_dashboard_xp)
+    TextView xpText;
     @InjectView(R.id.map_dashboard_location)
     TextView locationText;
 
@@ -156,7 +159,8 @@ public class PioMapFragment extends Fragment {
                         RecordUtil.startRecording(getActivity(), dashboard);
                         startRecordingVisuals();
                         sessionTime.setText(Util.formatLongToTime(0));
-                        areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+//                        areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+                        xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
                         slideDashboardUp(AnimUtil.animationSpeed);
                     }
                 }
@@ -187,7 +191,7 @@ public class PioMapFragment extends Fragment {
             warnVisuals();
         }
 
-        if(savedInstanceState!=null && savedInstanceState.getBoolean(KEY_RECORDING)) {
+        if (savedInstanceState != null && savedInstanceState.getBoolean(KEY_RECORDING)) {
             RecordUtil.startRecording(getActivity(), dashboard);
             RecordUtil.setLocation(savedInstanceState.getString(KEY_LOCATION));
             RecordUtil.setGpsStrength(savedInstanceState.getFloat(KEY_STRENGTH));
@@ -195,10 +199,11 @@ public class PioMapFragment extends Fragment {
             RecordUtil.setUncoveredKilometersSquared(savedInstanceState.getFloat(KEY_AREA));
             startRecordingVisuals();
             sessionTime.setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
-            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+            xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
+//            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
             locationText.setText(RecordUtil.getLocation());
             slideDashboardUp(0);
-        } else if(getArguments()!=null) {
+        } else if (getArguments() != null) {
             RecordUtil.startRecording(getActivity(), dashboard);
             RecordUtil.setLocation(getArguments().getString(KEY_LOCATION));
             RecordUtil.setGpsStrength(getArguments().getFloat(KEY_STRENGTH));
@@ -206,7 +211,8 @@ public class PioMapFragment extends Fragment {
             RecordUtil.setUncoveredKilometersSquared(getArguments().getFloat(KEY_AREA));
             startRecordingVisuals();
             sessionTime.setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
-            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+            xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
+//            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
             locationText.setText(RecordUtil.getLocation());
             slideDashboardUp(0);
         }
@@ -250,8 +256,9 @@ public class PioMapFragment extends Fragment {
         if (googleMap == null) {
             googleMap = mapFragment.getMap();
             setUpMap();
+            overlay.clearTileCache();
+            updateMarkers();
         }
-        overlay.clearTileCache();
 
         if (getActivity().getIntent().getExtras() != null && getActivity().getIntent().getExtras().containsKey(LocationUpdateService.SESSION_KEY)) {
             Bundle sessionData = getActivity().getIntent().getBundleExtra(LocationUpdateService.SESSION_KEY);
@@ -262,10 +269,13 @@ public class PioMapFragment extends Fragment {
             recordImage.setImageResource(R.drawable.ic_stop);
             recordImage.setPadding(0, 0, 0, 0);
             sessionTime.setText(Util.formatLongToTime(0));
-            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+            xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
+//            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
             slideDashboardUp(0);
             getActivity().getIntent().getExtras().clear();
         }
+
+
     }
 
     @Override
@@ -310,6 +320,7 @@ public class PioMapFragment extends Fragment {
 
     LatLng firstLatLng = null;
     long getLocationTime = 0;
+
     private void setUpMap() {
         if (googleMap != null) {
             googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -343,7 +354,7 @@ public class PioMapFragment extends Fragment {
             Criteria criteria = new Criteria();
             String provider = locationManager.getBestProvider(criteria, true);
             Location location = locationManager.getLastKnownLocation(provider);
-            if(location!=null) {
+            if (location != null) {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(location.getLatitude(), location.getLongitude()), 16));
             }
@@ -351,19 +362,17 @@ public class PioMapFragment extends Fragment {
             googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 @Override
                 public void onCameraChange(CameraPosition cameraPosition) {
-                    if(cameraPosition.zoom < 10 && markersShown) {
+                    if (cameraPosition.zoom < 10 && markersShown) {
                         markersShown = false;
-                        for(Marker marker : markers) {
+                        for (Marker marker : markers) {
                             marker.setVisible(false);
                         }
-                    } else if(cameraPosition.zoom >= 10 && !markersShown) {
+                    } else if (cameraPosition.zoom >= 10 && !markersShown) {
                         markersShown = true;
-                        for(Marker marker : markers) {
+                        for (Marker marker : markers) {
                             marker.setVisible(true);
                         }
                     }
-
-
                 }
             });
 
@@ -412,11 +421,11 @@ public class PioMapFragment extends Fragment {
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
-                                    getLocationTime = System.currentTimeMillis()+15000;
+                                    getLocationTime = System.currentTimeMillis() + 15000;
                                 }
                             }
-
-                            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
+                            xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
+//                            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
                         }
                     });
                 }
@@ -432,18 +441,23 @@ public class PioMapFragment extends Fragment {
             // Add the tile overlay to the map.
             overlay = googleMap.addTileOverlay(opts);
 
-            for(CityItem city : MonumentManager.cities) {
-                for(MonumentItem monument: city.getMonumentItems()) {
+            for (CityItem city : MonumentManager.cities) {
+                for (MonumentItem monument : city.getMonumentItems()) {
                     int iconRes = monument.getBitmapLockedSmall();
-                    if(ProfileManager.monumentIsUnlocked(monument.getId())) {
+                    if (ProfileManager.monumentIsUnlocked(monument.getId())) {
                         iconRes = monument.getBitmapUnlockedSmall();
                     }
                     Bitmap bm = BitmapFactory.decodeResource(getResources(), iconRes);
                     MarkerOptions marker = new MarkerOptions()
                             .position(new LatLng(monument.getPinLat(), monument.getPinLong()))
-                            .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bm, (int)Util.dpToPx(48, getActivity()), (int)Util.dpToPx(48, getActivity()), false)))
+                            .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bm, (int) Util.dpToPx(48, getActivity()), (int) Util.dpToPx(48, getActivity()), false)))
                             .title(monument.getName());
                     markers.add(googleMap.addMarker(marker));
+//                    googleMap.addCircle(new CircleOptions().center(new LatLng(monument.getPinLat(), monument.getPinLong()))
+//                                    .radius(monument.getRadius())
+//                                    .fillColor(getResources().getColor(R.color.debug_color))
+//                                    .strokeWidth(0)
+//                    );
                 }
             }
         }
@@ -453,14 +467,34 @@ public class PioMapFragment extends Fragment {
     ArrayList<Marker> markers = new ArrayList<>();
     boolean markersShown = true;
 
+    private void updateMarkers() {
+        for (Marker marker : markers) {
+            marker.remove();
+        }
+        for (CityItem city : MonumentManager.cities) {
+            for (MonumentItem monument : city.getMonumentItems()) {
+                int iconRes = monument.getBitmapLockedSmall();
+                if (ProfileManager.monumentIsUnlocked(monument.getId())) {
+                    iconRes = monument.getBitmapUnlockedSmall();
+                }
+                Bitmap bm = BitmapFactory.decodeResource(getResources(), iconRes);
+                MarkerOptions marker = new MarkerOptions()
+                        .position(new LatLng(monument.getPinLat(), monument.getPinLong()))
+                        .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bm, (int) Util.dpToPx(48, getActivity()), (int) Util.dpToPx(48, getActivity()), false)))
+                        .title(monument.getName());
+                markers.add(googleMap.addMarker(marker));
+            }
+        }
+    }
+
     private void slideDashboardUp(final int speed) {
 
-        if(root.getHeight()==0) {
+        if (root.getHeight() == 0) {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if(getActivity()!=null) {
+                    if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

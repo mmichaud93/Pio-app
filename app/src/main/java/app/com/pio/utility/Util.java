@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.com.pio.R;
+import app.com.pio.features.profiles.ProfileManager;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
@@ -42,7 +43,7 @@ public class Util {
     public static String formatLongToTime(long time) {
         time/=1000;
         int hours = (int) (time / 3600);
-        int minutes = (int) (time / 60);
+        int minutes = (int) ((time - hours * 3600) / 60);
         int seconds = (int) (time - minutes * 60 - hours * 3600);
 
         return (hours < 10 ? hours : hours)+":"+(minutes < 10 ? "0"+minutes : minutes)+":"+(seconds < 10 ? "0"+seconds : ""+seconds);
@@ -111,5 +112,26 @@ public class Util {
             return null;
         }
         return json;
+    }
+
+    public static int getLevelFromXP(int xp) {
+        float A = 0.7909f;
+        float EXP = 0.3177f;
+        float levelTotal = (float) (A * Math.pow(ProfileManager.activeProfile.getXp(), EXP));
+        if (levelTotal < 0) {
+            levelTotal = 0;
+        }
+        return (int) Math.floor(levelTotal);
+    }
+
+    public static double getExcessXP(int xp) {
+        float A = 0.7909f;
+        float EXP = 0.3177f;
+        float levelTotal = (float) (A * Math.pow(ProfileManager.activeProfile.getXp(), EXP));
+        if (levelTotal < 0) {
+            levelTotal = 0;
+        }
+        int level = (int) Math.floor(levelTotal);
+        return levelTotal - level;
     }
 }

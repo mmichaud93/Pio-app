@@ -237,7 +237,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                         @Override
                         public void failure(RetrofitError error) {
                             isLoggingIn = false;
-                            emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_x_mark), null);
+                            emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
                             Log.d(TAG, "could not verify user existence", error);
                             emailCheckAttempts--;
                         }

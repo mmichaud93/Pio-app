@@ -14,8 +14,10 @@
     <GridView
         android:id="@+id/city_detail_grid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_margin="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"
         android:horizontalSpacing="0dp"
         android:numColumns="3"
         android:stretchMode="columnWidth"

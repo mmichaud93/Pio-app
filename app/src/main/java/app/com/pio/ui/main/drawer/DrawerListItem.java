@@ -2,6 +2,7 @@ package app.com.pio.ui.main.drawer;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import app.com.pio.R;
@@ -12,9 +13,11 @@ import app.com.pio.R;
 public class DrawerListItem implements DrawerItem {
 
     private String itemText;
+    private int iconRes;
 
-    public DrawerListItem(String itemText) {
+    public DrawerListItem(String itemText, int iconRes) {
         this.itemText = itemText;
+        this.iconRes = iconRes;
     }
 
     @Override
@@ -29,17 +32,22 @@ public class DrawerListItem implements DrawerItem {
             convertView = (View) inflater.inflate(R.layout.adapter_drawer_item, null);
             viewHolder = new ViewHolder();
             viewHolder.link = (TextView) convertView.findViewById(R.id.list_item_text);
+            viewHolder.icon = (ImageView) convertView.findViewById(R.id.list_item_icon);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
         viewHolder.link.setText(itemText);
+        if(iconRes > 0) {
+            viewHolder.icon.setImageResource(iconRes);
+        }
 
         return convertView;
     }
 
     private static class ViewHolder {
         TextView link;
+        ImageView icon;
     }
 }

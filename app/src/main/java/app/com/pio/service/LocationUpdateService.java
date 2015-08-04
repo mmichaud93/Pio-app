@@ -14,7 +14,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.Wearable;
 
 import java.text.DecimalFormat;
 
@@ -27,6 +31,7 @@ import app.com.pio.ui.map.MaskTileProvider;
 import app.com.pio.ui.map.RecordUtil;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.utility.Util;
+import app.com.pio.wear.SendToDataLayerThread;
 
 /**
  * Created by mmichaud on 6/14/15.
@@ -60,6 +65,8 @@ public class LocationUpdateService extends Service {
             if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 5, locationListener);
             }
+
+
         }
         return Service.START_NOT_STICKY;
     }
@@ -85,7 +92,7 @@ public class LocationUpdateService extends Service {
                 .setWhen(System.currentTimeMillis())
                 .setAutoCancel(false)
                 .setContentTitle(getString(R.string.service_title))
-                .setContentText(getString(R.string.service_text, areaFormat.format(kiloSquared)))
+                .setContentText(getString(R.string.service_text, RecordUtil.getGainedXP()))
                 .setOngoing(true);
         return builder.build();
     }
@@ -134,7 +141,7 @@ public class LocationUpdateService extends Service {
                 RecordUtil.setDistanceTravelled(RecordUtil.getDistanceTravelled() + distance);
 
                 if (distance <= 0.001) {
-                    if (location.getSpeed() > 10) {
+                    if (location.getSpeed() > 5) {
                         for (int i = 0; i < speed; i++) {
                             registerLocationChange(new LatLng(
                                     (float) (previousLocation.getLatitude() + (location.getLatitude() - previousLocation.getLatitude()) / location.getSpeed() * i),
@@ -184,6 +191,8 @@ public class LocationUpdateService extends Service {
             Log.d("PIO", "[LocationUpdateService] unlocked monument "+monumentItem.getName());
             monumentItem.setIsUnlocked(true);
             ProfileManager.activeProfile.addMonument(monumentItem.getId());
+            ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + monumentItem.getXpValue());
+            RecordUtil.addGainedXP(monumentItem.getXpValue());
             NotificationManager notificationManager = (NotificationManager) getApplicationContext()
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(NOTIFICATION_MONUMENT_ID, buildMonumentNotification(monumentItem));
@@ -191,7 +200,11 @@ public class LocationUpdateService extends Service {
         if (MVDatabase.storePoint((float) latLng.latitude, (float) latLng.longitude, true)) {
             float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
             RecordUtil.recordPoint(uncoveredArea);
+            ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + 1);
             kiloSquared += uncoveredArea;
+            NotificationManager notificationManager = (NotificationManager) getApplicationContext()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(NOTIFICATION_ID, buildNotification());
         }
 
     }

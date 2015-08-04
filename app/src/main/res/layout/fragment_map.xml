@@ -107,12 +107,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/area"
+                android:text="@string/xp_label"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_color"/>
             <TextView
-                android:id="@+id/map_dashboard_area"
+                android:id="@+id/map_dashboard_xp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/area_km"

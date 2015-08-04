@@ -11,8 +11,9 @@
           "pin": {
             "lat": 42.366303, 
             "lon": -71.054404,
-            "radius": 20
+            "radius": 38
           },
+          "xp_value": 2500,
           "bitmap_locked": "old_north_church_bw",
           "bitmap_unlocked": "old_north_church"
         }, 
@@ -23,8 +24,9 @@
           "pin": {
             "lat": 42.346648, 
             "lon": -71.097209,
-            "radius": 130
+            "radius": 140
           },
+          "xp_value": 2500,
           "bitmap_locked": "fenway_park_bw",
           "bitmap_unlocked": "fenway_park"
         }, 
@@ -35,8 +37,9 @@
           "pin": {
             "lat": 42.372481, 
             "lon": -71.056616,
-            "radius": 80
+            "radius": 70
           },
+          "xp_value": 2500,
           "bitmap_locked": "uss_constitution_bw",
           "bitmap_unlocked": "uss_constitution"
         }, 
@@ -49,8 +52,35 @@
             "lon": -71.094291,
             "radius": 300
           },
+          "xp_value": 2500,
           "bitmap_locked": "mit_bw",
           "bitmap_unlocked": "mit"
+        }, 
+        {
+          "id": "wit_bos",
+          "name": "WIT",
+          "location": "Boston, MA",
+          "pin": {
+            "lat": 42.336123,  
+            "lon": -71.095291,
+            "radius": 100
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "wit_bw",
+          "bitmap_unlocked": "wit"
+        }, 
+        {
+          "id": "ducks_bos",
+          "name": "Make Way for Ducklings",
+          "location": "Boston, MA",
+          "pin": {
+            "lat": 42.355498,  
+            "lon": -71.069783,
+            "radius": 14
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "make_way_for_ducklings_bw",
+          "bitmap_unlocked": "make_way_for_ducklings"
         }
       ]
     } 

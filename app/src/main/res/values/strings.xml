@@ -15,9 +15,11 @@
     <string name="no">no</string>
 
     <string name="service_ticker">Beginning your journey!</string>
-    <string name="service_title">Exploring the world...</string>
-    <string name="service_text">%skm² this session</string>
+    <string name="service_title">Pio</string>
+    <string name="service_text">%s XP gained</string>
     <string name="area_km">%s km²</string>
+    <string name="xp_label">XP</string>
+    <string name="xp">+%s XP</string>
     <string name="stats_total_area_text">Total area uncovered: %s</string>
     <string name="stats_total_time_text">Total time spent exploring: %s</string>
     <string name="stats_speed_text">Current speed: %s</string>
@@ -50,4 +52,9 @@
         <item>Monuments</item>
         <item>Stats</item>
     </string-array>
+    <array name="nav_bar_icons">
+        <item>@drawable/ic_maps_map</item>
+        <item>@drawable/ic_monuments</item>
+        <item>@drawable/ic_action_stars</item>
+    </array>
 </resources>

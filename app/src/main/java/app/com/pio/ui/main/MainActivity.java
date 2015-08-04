@@ -1,6 +1,7 @@
 package app.com.pio.ui.main;
 
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -47,8 +48,8 @@ import retrofit.client.Response;
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,
         DrawerLayout.DrawerListener {
 
-    private String[] navBarItems;
     private ArrayList<DrawerItem> items;
+    private DrawerAdapter drawerAdapter;
 
     @InjectView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
@@ -80,6 +81,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             // continue with app use
             initRegularApp(savedInstanceState);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        updateDrawerHeader();
     }
 
     @Override
@@ -123,18 +131,20 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             }
         });
 
-        navBarItems = getResources().getStringArray(R.array.nav_bar_items);
+        String[] navBarItems = getResources().getStringArray(R.array.nav_bar_items);
+        TypedArray navBarIcons = getResources().obtainTypedArray(R.array.nav_bar_icons);
         drawerLayout.setDrawerListener(this);
 
         items = new ArrayList<DrawerItem>();
         //get profile object - mock up for now
         //newprofile model ...
-        items.add(new DrawerHeaderItem("THIS IS A HEADER", "https://lh3.googleusercontent.com/-uPDbuzhFn2Y/AAAAAAAAAAI/AAAAAAAABdE/tFm-2KDRYyA/s160-c-k-no/photo.jpg"));
-        for (String s : navBarItems) {
-            items.add(new DrawerListItem(s));
+        items.add(new DrawerHeaderItem());
+        for (int i = 0; i < navBarItems.length; i++) {
+            items.add(new DrawerListItem(navBarItems[i], navBarIcons.getResourceId(i, -1)));
         }
 
-        drawerList.setAdapter(new DrawerAdapter(this, items));
+        drawerAdapter = new DrawerAdapter(this, items);
+        drawerList.setAdapter(drawerAdapter);
         drawerList.setOnItemClickListener(this);
 
         // login in the background
@@ -145,23 +155,25 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     @Override
                     public void success(ProfileResponse profileResponse, Response response) {
                         Log.d("PIO", "[MainActivity] successfully logged in!");
-                        if (profileResponse.getProfile()==null) {
+                        if (profileResponse.getProfile() == null) {
                             return;
                         }
                         if (ProfileManager.activeProfile == null) {
                             ProfileManager.activeProfile = profileResponse.getProfile();
                             ProfileManager.saveActiveProfile();
+                            updateDrawerHeader();
                         } else {
                             if (profileResponse.getProfile().getLastUpdated() > ProfileManager.activeProfile.getLastUpdated()) {
                                 ProfileManager.activeProfile = profileResponse.getProfile();
                                 ProfileManager.saveActiveProfile();
+                                updateDrawerHeader();
                             } else {
                                 // the profile item on the server is out of data and we need to push the local copy to the server,
                                 // this will happen a very large majority of the time
                                 PioApiController.pushUser(ProfileManager.activeProfile, new Callback<PioApiResponse>() {
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
-
+                                        updateDrawerHeader();
                                     }
 
                                     @Override
@@ -182,7 +194,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 });
     }
 
-
+    private void updateDrawerHeader() {
+        if (drawerAdapter!=null) {
+            drawerAdapter.notifyDataSetChanged();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

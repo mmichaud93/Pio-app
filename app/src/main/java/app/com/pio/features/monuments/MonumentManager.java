@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.utility.Util;
@@ -44,6 +45,7 @@ public class MonumentManager {
                             monument.getString("id"),
                             monument.getString("name"),
                             monument.getString("location"),
+                            monument.getInt("xp_value"),
                             context.getResources().getIdentifier(monument.getString("bitmap_locked") + "_large", "drawable", context.getPackageName()),
                             context.getResources().getIdentifier(monument.getString("bitmap_unlocked") + "_large", "drawable", context.getPackageName()),
                             context.getResources().getIdentifier(monument.getString("bitmap_locked")+"_med", "drawable", context.getPackageName()),
@@ -75,7 +77,7 @@ public class MonumentManager {
                     model.getLatLng().latitude, model.getLatLng().longitude,
                     latLng.latitude, latLng.longitude, results);
             float distance = results[0];
-            if(distance < model.getRadius() && !model.getMonument().isUnlocked()) {
+            if(distance < model.getRadius() && !(model.getMonument().isUnlocked() || (ProfileManager.activeProfile.getMonuments().contains(model.getMonument().getId())))) {
                 Log.d("PIO", "[MonumentManager] within range ("+distance+") of "+model.getMonument().getName());
                 return model.getMonument();
             }

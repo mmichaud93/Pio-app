@@ -17,6 +17,8 @@ public class MonumentItem implements Serializable {
 
     boolean isUnlocked;
 
+    int xpValue;
+
     int bitmapLockedLarge;
     int bitmapUnlockedLarge;
     int bitmapLockedMed;
@@ -28,10 +30,11 @@ public class MonumentItem implements Serializable {
     double pinLong;
     double radius;
 
-    public MonumentItem(String id, String name, String location, int bitmapLockedLarge, int bitmapUnlockedLarge, int bitmapLockedMed, int bitmapUnlockedMed, int bitmapLockedSmall, int bitmapUnlockedSmall, double pinLat, double pinLong, double radius) {
+    public MonumentItem(String id, String name, String location, int xpValue, int bitmapLockedLarge, int bitmapUnlockedLarge, int bitmapLockedMed, int bitmapUnlockedMed, int bitmapLockedSmall, int bitmapUnlockedSmall, double pinLat, double pinLong, double radius) {
         this.id = id;
         this.name = name;
         this.location = location;
+        this.xpValue = xpValue;
         this.bitmapLockedLarge = bitmapLockedLarge;
         this.bitmapUnlockedLarge = bitmapUnlockedLarge;
         this.bitmapLockedMed = bitmapLockedMed;
@@ -145,5 +148,13 @@ public class MonumentItem implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getXpValue() {
+        return xpValue;
+    }
+
+    public void setXpValue(int xpValue) {
+        this.xpValue = xpValue;
     }
 }

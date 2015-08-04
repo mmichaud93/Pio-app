@@ -5,9 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.Wearable;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,6 +23,7 @@ import app.com.pio.R;
 import app.com.pio.service.LocationUpdateService;
 import app.com.pio.utility.PrefUtil;
 import app.com.pio.utility.Util;
+import app.com.pio.wear.SendToDataLayerThread;
 
 /**
  * Created by mmichaud on 6/12/15.
@@ -35,9 +43,12 @@ public class RecordUtil {
     private static float distanceTravelled = 0;
     private static int numberOfPoints = 0;
     private static float speed = 0;
+    private static int gainedXP = 0;
 
     private static TimerTask timerTask;
     private static Timer timer;
+
+    private static GoogleApiClient googleClient;
 
     public static void startRecording(Activity activity, View dashboard) {
         RecordUtil.activity = activity;
@@ -49,11 +60,11 @@ public class RecordUtil {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                if(RecordUtil.activity!=null) {
+                if (RecordUtil.activity != null) {
                     RecordUtil.activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ((TextView)RecordUtil.dashboard.findViewById(R.id.map_dashboard_session_time)).setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
+                            ((TextView) RecordUtil.dashboard.findViewById(R.id.map_dashboard_session_time)).setText(Util.formatLongToTime(RecordUtil.getRecordingSessionTime()));
                         }
                     });
                 }
@@ -61,17 +72,39 @@ public class RecordUtil {
         };
         startTimer();
 
+        googleClient = new GoogleApiClient.Builder(activity)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult connectionResult) {
+                    }
+                })
+                .build();
+        googleClient.connect();
         startService(activity);
     }
 
     public static void stopRecording(Context context) {
         isRecording = false;
         stopTimer();
-        if(intent!=null) {
+        if (intent != null) {
             context.stopService(intent);
         }
 
-        if(activity!=null) {
+        if (googleClient != null && googleClient.isConnected()) {
+            googleClient.disconnect();
+        }
+
+        if (activity != null) {
             float totalArea = PrefUtil.getPref(activity, PrefUtil.PREFS_STATS_AREA_KEY, 0f);
             totalArea += uncoveredKilometersSquared;
             PrefUtil.savePref(activity, PrefUtil.PREFS_STATS_AREA_KEY, totalArea);
@@ -90,6 +123,7 @@ public class RecordUtil {
         numberOfPoints = 0;
         distanceTravelled = 0;
         speed = 0;
+        gainedXP = 0;
     }
 
     public static void startService(Context context) {
@@ -111,14 +145,20 @@ public class RecordUtil {
     }
 
     public static void recordPoint(float kiloSquared) {
-        if(isRecording) {
-            uncoveredKilometersSquared+=kiloSquared;
+        if (isRecording) {
+            uncoveredKilometersSquared += kiloSquared;
             numberOfPoints++;
+            gainedXP += 1;
+
+            DataMap dataMap = new DataMap();
+            dataMap.putString("xp", ""+RecordUtil.getGainedXP());
+            dataMap.putString("time", ""+System.currentTimeMillis());
+            new SendToDataLayerThread("/pio", dataMap, googleClient).start();
         }
     }
 
     public static long getRecordingSessionTime() {
-        if(sessionTimeStart != 0) {
+        if (sessionTimeStart != 0) {
             return System.currentTimeMillis() - sessionTimeStart;
         } else {
             return 0;
@@ -183,5 +223,17 @@ public class RecordUtil {
 
     public static void setSpeed(float speed) {
         RecordUtil.speed = speed;
+    }
+
+    public static int getGainedXP() {
+        return gainedXP;
+    }
+
+    public static void addGainedXP(int xp) {
+        gainedXP += xp;
+    }
+
+    public static void setGainedXP(int gainedXP) {
+        RecordUtil.gainedXP = gainedXP;
     }
 }

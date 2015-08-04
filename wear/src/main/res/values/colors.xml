@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="app_primary">#03A9F4</color>
+    <color name="app_primary_dark">#0277BD</color>
+    <color name="app_primary_light">#81D4FA</color>
+
+    <color name="app_accent">#9C27B0</color>
+    <color name="app_accent_light">#BA68C8</color>
+    <color name="app_accent_dark">#7B1FA2</color>
+
+    <color name="disabled_gray">#EFEFEF</color>
+    <color name="disabled_gray_text">#BFBFBF</color>
+    <color name="button_gray">#D4D4D4</color>
+    <color name="button_gray_pressed">#BFBFBF</color>
+
+    <color name="stop_color">#F44336</color>
+    <color name="stop_color_pressed">#E53935</color>
+
+    <color name="start_color">#4CAF50</color>
+    <color name="start_color_pressed">#43A047</color>
+
+    <color name="warn_color">#FFC107</color>
+    <color name="warn_color_pressed">#FFB300</color>
+
+    <color name="yellow">#FBC02D</color>
+    <color name="yellow_dark">#FBC02D</color>
+    <color name="yellow_light">#FFEB3B</color>
+
+    <color name="gps_grey">#888888</color>
+    <color name="text_color">#303030</color>
+
+    <color name="header_semi_transparent">#ddfafafa</color>
+    <color name="debug_color">#cc81D4FA</color>
+
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="gray">#888888</color>
+    <color name="light_gray">#bbbbbb</color>
+</resources>

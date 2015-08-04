@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/app_primary_dark"
+              android:orientation="vertical"
+              android:paddingTop="52dp"
+              android:paddingLeft="32dp"
+              android:paddingRight="8dp"
+              tools:context=".MainActivity"
+              tools:deviceIds="wear_rect">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="fintap"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white"/>
+    <TextView
+        android:id="@+id/unpaid_bills"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fetching info"
+        android:textSize="16sp"
+        android:textColor="@color/white"/>
+    <TextView
+        android:id="@+id/unpaid_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="16sp"
+        android:textColor="@color/white"/>
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:visibility="gone"/>
+</LinearLayout>
