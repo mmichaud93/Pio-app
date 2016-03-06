@@ -1,18 +1,15 @@
 package app.com.pio.ui.map;
 
 import android.animation.Animator;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
-import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
@@ -20,8 +17,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +31,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -46,28 +40,21 @@ import com.google.android.gms.maps.model.TileOverlayOptions;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import app.com.pio.R;
-import app.com.pio.api.PioApiController;
-import app.com.pio.api.PioApiResponse;
-import app.com.pio.database.MVDatabase;
 import app.com.pio.features.monuments.MonumentManager;
 import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.service.LocationUpdateService;
 import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.ui.monuments.MonumentItem;
+import app.com.pio.ui.monuments.MonumentsFragment;
+import app.com.pio.ui.stats.StatsFragment;
 import app.com.pio.utility.AnimUtil;
 import app.com.pio.utility.Util;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * Created by mmichaud on 5/22/15.
@@ -95,6 +82,10 @@ public class PioMapFragment extends Fragment {
     Button recordButton;
     @InjectView(R.id.map_record_image)
     ImageView recordImage;
+    @InjectView(R.id.map_monuments_button)
+    Button monumentsButton;
+    @InjectView(R.id.map_friends_button)
+    Button friendsButton;
     @InjectView(R.id.map_dashboard)
     RelativeLayout dashboard;
     @InjectView(R.id.map_gps_bar_1)
@@ -107,8 +98,6 @@ public class PioMapFragment extends Fragment {
     View bar4;
     @InjectView(R.id.map_dashboard_session_time)
     TextView sessionTime;
-    //    @InjectView(R.id.map_dashboard_area)
-//    TextView areaText;
     @InjectView(R.id.map_dashboard_xp)
     TextView xpText;
     @InjectView(R.id.map_dashboard_location)
@@ -159,11 +148,24 @@ public class PioMapFragment extends Fragment {
                         RecordUtil.startRecording(getActivity(), dashboard);
                         startRecordingVisuals();
                         sessionTime.setText(Util.formatLongToTime(0));
-//                        areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
                         xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
                         slideDashboardUp(AnimUtil.animationSpeed);
                     }
                 }
+            }
+        });
+
+        monumentsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, MonumentsFragment.newInstance(), "Monuments").addToBackStack("Monuments").commit();
+            }
+        });
+
+        friendsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, StatsFragment.newInstance(), "Stats").addToBackStack("Stats").commit();
             }
         });
 

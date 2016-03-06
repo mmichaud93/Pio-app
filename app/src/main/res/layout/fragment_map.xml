@@ -168,4 +168,51 @@
             android:paddingLeft="5dp"
             android:src="@drawable/ic_play"/>
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/map_monuments"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true">
+        <Button
+            android:id="@+id/map_monuments_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="48dp"
+            android:elevation="2dp"
+            android:background="@drawable/other_button_background"
+            android:textColor="@android:color/white"/>
+        <ImageView
+            android:id="@+id/map_monuments_image"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_centerInParent="true"
+            android:elevation="6dp"
+            android:src="@drawable/ic_monuments_white"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/map_friends"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/map_monuments"
+        android:layout_alignParentLeft="true">
+        <Button
+            android:id="@+id/map_friends_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="0dp"
+            android:elevation="2dp"
+            android:background="@drawable/other_button_background"
+            android:textColor="@android:color/white"/>
+        <ImageView
+            android:id="@+id/map_friends_image"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_centerInParent="true"
+            android:elevation="6dp"
+            android:src="@drawable/ic_friends_white"/>
+    </RelativeLayout>
 </RelativeLayout>

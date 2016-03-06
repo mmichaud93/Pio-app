@@ -2,6 +2,7 @@ package app.com.pio.ui.stats;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,8 @@ public class StatsFragment extends Fragment {
         root = inflater.inflate(R.layout.fragment_stats, container, false);
         ButterKnife.inject(this, root);
 
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         totalArea.setText(getString(R.string.stats_total_area_text,
                 (PrefUtil.getPref(getActivity(), PrefUtil.PREFS_STATS_AREA_KEY, 0f) + RecordUtil.getUncoveredKilometersSquared())));
         totalTime.setText(getString(R.string.stats_total_time_text,
@@ -55,5 +58,12 @@ public class StatsFragment extends Fragment {
                 RecordUtil.getDistanceTravelled()));
         return root;
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle("Stats");
     }
 }

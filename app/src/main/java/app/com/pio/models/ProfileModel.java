@@ -26,6 +26,9 @@ public class ProfileModel {
     @SerializedName("pass")
     String pass;
     @Expose
+    @SerializedName("facebook")
+    FacebookPart facebook;
+    @Expose
     @SerializedName("image")
     String image;
     @Expose
@@ -44,10 +47,24 @@ public class ProfileModel {
     @SerializedName("lastUpdated")
     long lastUpdated;
 
-    public ProfileModel(String name, String email, String pass, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
+    public ProfileModel(String name, String email, String pass, FacebookPart facebook, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
         this.name = name;
         this.email = email;
         this.pass = pass;
+        this.facebook = facebook;
+        this.image = image;
+        this.premium = premium;
+        this.monuments = monuments;
+        this.xp = xp;
+        this.createdAt = createdAt;
+        this.lastUpdated = lastUpdated;
+    }
+
+    public ProfileModel(String name, String email, String pass, String facebookAccessToken, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
+        this.name = name;
+        this.email = email;
+        this.pass = pass;
+        this.facebook = new FacebookPart(facebookAccessToken);
         this.image = image;
         this.premium = premium;
         this.monuments = monuments;
@@ -86,6 +103,18 @@ public class ProfileModel {
     public void setPass(String pass) {
         this.pass = pass;
         saveProfile();
+    }
+
+    public FacebookPart getFacebook() {
+        return facebook;
+    }
+
+    public void setFacebook(FacebookPart facebook) {
+        this.facebook = facebook;
+    }
+
+    public void setFacebook(String facebookAccessToken) {
+        this.facebook = new FacebookPart(facebookAccessToken);
     }
 
     public String getImage() {
@@ -146,5 +175,24 @@ public class ProfileModel {
 
     public void setLastUpdated(long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public class FacebookPart {
+
+        @Expose
+        @SerializedName("access_token")
+        String accessToken;
+
+        public FacebookPart(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
+        }
     }
 }

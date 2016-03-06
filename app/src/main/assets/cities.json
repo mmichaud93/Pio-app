@@ -2,7 +2,20 @@
   "cities" : [
     {
       "name": "Boston",
-      "monument_count": 4,
+      "description": "",
+      "short_description": "",
+      "fun_facts": [
+        "Boston was settled by Puritans on September 7th, 1630.",
+        "On January 15, 1919 a 25 foot tall wave of molasses killed 21 people in the North End.",
+        "The Boston Common is the oldest public park in the US.",
+        "Boston is home to America's first subway, built in 1897.",
+        "Leonard Nimoy was born in the West End of Boston.",
+        "The Boston Tea Party is reenacted annualy on December 16th.",
+        "The Massachusetts state dog is the Boston Terrier."
+      ],
+      "stats": {
+        "area": 232.14
+      },
       "monuments": [
         {
           "id": "old_north_church_bos",
@@ -83,6 +96,32 @@
           "bitmap_unlocked": "make_way_for_ducklings"
         }
       ]
-    } 
+    },
+    {
+      "name": "New York City",
+      "description": "",
+      "short_description": "",
+      "fun_facts": [
+
+      ],
+      "stats": {
+        "area": 1214
+      },
+      "monuments": [
+        {
+          "id": "empire_state_building_nyc",
+          "name": "Empire State Building",
+          "location": "New York City, NY",
+          "pin": {
+            "lat": 40.748411,
+            "lon": -73.985680,
+            "radius": 150
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "empire_state_building_bw",
+          "bitmap_unlocked": "empire_state_building"
+        }
+      ]
+    }
   ]
 }

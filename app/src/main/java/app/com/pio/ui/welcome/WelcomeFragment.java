@@ -23,6 +23,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -34,6 +39,7 @@ import app.com.pio.api.ProfileResponse;
 import app.com.pio.api.PioApiController;
 import app.com.pio.api.PioApiResponse;
 import app.com.pio.features.profiles.ProfileManager;
+import app.com.pio.models.ProfileModel;
 import app.com.pio.models.WelcomePageModel;
 import app.com.pio.ui.main.MainActivity;
 import app.com.pio.utility.AnimUtil;
@@ -50,16 +56,15 @@ import static app.com.pio.utility.Util.*;
 /**
  * Created by mmichaud on 5/28/15.
  */
-public class WelcomeFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class WelcomeFragment extends Fragment {
 
     private static String TAG = "WelcomeFragment";
 
     View root;
     @InjectView(R.id.sign_in_parent)
     LinearLayout signInParent;
-    @InjectView(R.id.sign_in_button_google)
-    SignInButton signInButtonGoogle;
+    @InjectView(R.id.sign_in_button_facebook)
+    LoginButton signInButtonFacebook;
     @InjectView(R.id.sign_in_button_email)
     Button signInButtonEmail;
     @InjectView(R.id.welcome_pager)
@@ -86,7 +91,6 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
     ProgressBar loading;
 
     private static final int RC_SIGN_IN = 0;
-    private GoogleApiClient mGoogleApiClient;
     private boolean mSignInClicked;
     private boolean mIntentInProgress;
 
@@ -96,7 +100,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
 
     private int emailCheckAttempts = 0;
 
-
+    private CallbackManager callbackManager;
 
     public static WelcomeFragment newInstance() {
 
@@ -183,13 +187,100 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
             }
         });
 
-        signInButtonGoogle.setOnClickListener(new View.OnClickListener() {
+        signInButtonFacebook.setReadPermissions("user_friends");
+        // If using in a fragment
+        // Other app specific specialization
+        callbackManager = CallbackManager.Factory.create();
+        // Callback registration
+        signInButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onClick(View view) {
-                if (!mGoogleApiClient.isConnecting()) {
-                    mSignInClicked = true;
-                    mGoogleApiClient.connect();
+            public void onSuccess(final LoginResult loginResult) {
+                // App code
+                if (loginResult != null && loginResult.getAccessToken() != null) {
+                    // show loading spinner
+                    loading.setVisibility(View.VISIBLE);
+                    PioApiController.userExists(loginResult.getAccessToken().getUserId(), new Callback<PioApiResponse>() {
+                        @Override
+                        public void success(PioApiResponse pioApiResponse, Response response) {
+                            if (pioApiResponse.getMsg().equals("true")) {
+                                // the user is signing in, not signing up
+                                PioApiController.loginUser(getActivity(), loginResult.getAccessToken().getUserId(),
+                                        PrefUtil.encryptText(loginResult.getAccessToken().getUserId()), new Callback<ProfileResponse>() {
+                                            @Override
+                                            public void success(ProfileResponse profileResponse, Response response) {
+                                                loading.setVisibility(View.GONE);
+                                                if (profileResponse.getMsg().equals("true")) {
+                                                    // login success
+                                                    ProfileManager.activeProfile = profileResponse.getProfile();
+                                                    ProfileManager.activeProfile.setFacebook(loginResult.getAccessToken().getToken());
+                                                    PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.FACEBOOK.name());
+                                                    PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, loginResult.getAccessToken().getUserId());
+                                                    PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, PrefUtil.encryptText(loginResult.getAccessToken().getUserId()));
+                                                    PrefUtil.savePref(getActivity(), PrefUtil.PREFS_FACEBOOK_TOKEN, loginResult.getAccessToken().getToken());
+
+                                                    ((MainActivity) getActivity()).initRegularApp(null);
+                                                    getActivity().supportInvalidateOptionsMenu();
+                                                } else {
+                                                    // login failure
+                                                    Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+                                                }
+                                            }
+
+                                            @Override
+                                            public void failure(RetrofitError error) {
+                                                // login failure
+                                                loading.setVisibility(View.GONE);
+                                                Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+                                            }
+                                        });
+                            } else {
+                                // new user
+
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.FACEBOOK.name());
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, loginResult.getAccessToken().getUserId());
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, PrefUtil.encryptText(loginResult.getAccessToken().getUserId()));
+                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_FACEBOOK_TOKEN, loginResult.getAccessToken().getToken());
+
+                                PioApiController.sendNewUser(getActivity(), loginResult.getAccessToken().getUserId(), PrefUtil.encryptText(loginResult.getAccessToken().getUserId()),
+                                        PrefUtil.LoginTypes.FACEBOOK.name(), loginResult.getAccessToken().getToken(), new Callback<PioApiResponse>() {
+                                            @Override
+                                            public void success(PioApiResponse pioApiResponse, Response response) {
+                                                loading.setVisibility(View.GONE);
+                                                if (pioApiResponse.getCode() == 200) {
+                                                    ((MainActivity) getActivity()).initRegularApp(null);
+                                                    getActivity().supportInvalidateOptionsMenu();
+                                                } else {
+                                                    Util.makeCroutonText("Could not create new user, try again later", getActivity());
+                                                }
+                                            }
+
+                                            @Override
+                                            public void failure(RetrofitError error) {
+                                                loading.setVisibility(View.GONE);
+                                                Util.makeCroutonText("Could not create new user, try again later", getActivity());
+                                            }
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            Log.d(TAG, "could not verify facebook user existence", error);
+                        }
+                    });
                 }
+            }
+
+            @Override
+            public void onCancel() {
+                // App code
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                // App code
+                Log.d(TAG, "Could not log in with facebook. onError: "+exception.getMessage());
+                Util.makeCroutonText("Could not sign in with Facebook, please try again later", getActivity());
             }
         });
 
@@ -226,11 +317,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                     PioApiController.userExists(editable.toString(), new Callback<PioApiResponse>() {
                         @Override
                         public void success(PioApiResponse pioApiResponse, Response response) {
-                            if (pioApiResponse.getMsg().equals("true")) {
-                                isLoggingIn = true;
-                            } else {
-                                isLoggingIn = false;
-                            }
+                            isLoggingIn = pioApiResponse.getMsg().equals("true");
                             emailCheckAttempts--;
                         }
 
@@ -278,14 +365,6 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
                 attemptLogin();
             }
         });
-
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(new Scope("profile"))
-                .addScope(new Scope("email"))
-                .build();
 
         return root;
     }
@@ -339,7 +418,7 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
             PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
 
             PioApiController.sendNewUser(getActivity(), emailEditEmail.getText().toString(),
-                    emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), new Callback<PioApiResponse>() {
+                    emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), null, new Callback<PioApiResponse>() {
                         @Override
                         public void success(PioApiResponse pioApiResponse, Response response) {
                             loading.setVisibility(View.GONE);
@@ -360,142 +439,96 @@ public class WelcomeFragment extends Fragment implements GoogleApiClient.Connect
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
+//    @Override
+//    public void onConnected(Bundle bundle) {
+//        mSignInClicked = false;
+//        // do things with the login info
+//        loading.setVisibility(View.VISIBLE);
+//        final String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+//        if (email != null) {
+//            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
+//                if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).hasId()) {
+//                    PioApiController.userExists(email, new Callback<PioApiResponse>() {
+//                        @Override
+//                        public void success(PioApiResponse pioApiResponse, Response response) {
+//                            if (pioApiResponse.getMsg().equals("true")) {
+//                                // email exists, try to login
+//                                PioApiController.loginUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), new Callback<ProfileResponse>() {
+//                                    @Override
+//                                    public void success(ProfileResponse profileResponse, Response response) {
+//                                        loading.setVisibility(View.GONE);
+//
+//                                        if (profileResponse.getMsg().equals("true")) {
+//                                            // login success
+//                                            // TODO: I dont know what else we need to do here
+//                                            ProfileManager.activeProfile = profileResponse.getProfile();
+//                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
+//                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
+//                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
+//
+//                                            ((MainActivity) getActivity()).initRegularApp(null);
+//                                            getActivity().supportInvalidateOptionsMenu();
+//                                        } else {
+//                                            if (mSignInClicked) {
+//                                                Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+//                                            }
+//                                        }
+//                                    }
+//
+//                                    @Override
+//                                    public void failure(RetrofitError error) {
+//                                        loading.setVisibility(View.GONE);
+//                                        Util.makeCroutonText("Could not authenticate user, try again later", getActivity());
+//                                    }
+//                                });
+//                            } else {
+//                                // email does not exists, create new user
+//                                PioApiController.sendNewUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), PrefUtil.LoginTypes.GOOGLE.name(), new Callback<PioApiResponse>() {
+//                                    @Override
+//                                    public void success(PioApiResponse pioApiResponse, Response response) {
+//                                        loading.setVisibility(View.GONE);
+//                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
+//                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
+//                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
+//
+//                                        if (pioApiResponse.getCode() == 200) {
+//                                            ((MainActivity) getActivity()).initRegularApp(null);
+//                                            getActivity().supportInvalidateOptionsMenu();
+//                                        } else {
+//                                            Util.makeCroutonText("Could not create new user, try again later", getActivity());
+//                                        }
+//                                    }
+//
+//                                    @Override
+//                                    public void failure(RetrofitError error) {
+//                                        loading.setVisibility(View.GONE);
+//                                        Util.makeCroutonText("Could not create new user, try again later", getActivity());
+//                                    }
+//                                });
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void failure(RetrofitError error) {
+//                            loading.setVisibility(View.GONE);
+//                            Util.makeCroutonText("Could not authenticate user, try again later", getActivity());
+//                        }
+//                    });
+//                }
+//            }
+//
+//
+//        } else {
+//            // need email, should fail here
+//            loading.setVisibility(View.GONE);
+//            Util.makeCroutonText("Could not authenticate user, try again later", getActivity());
+//        }
+//    }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        mGoogleApiClient.disconnect();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        mSignInClicked = false;
-        // do things with the login info
-        loading.setVisibility(View.VISIBLE);
-        final String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-        if (email != null) {
-            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
-                if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).hasId()) {
-                    PioApiController.userExists(email, new Callback<PioApiResponse>() {
-                        @Override
-                        public void success(PioApiResponse pioApiResponse, Response response) {
-                            if (pioApiResponse.getMsg().equals("true")) {
-                                // email exists, try to login
-                                PioApiController.loginUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), new Callback<ProfileResponse>() {
-                                    @Override
-                                    public void success(ProfileResponse profileResponse, Response response) {
-                                        loading.setVisibility(View.GONE);
-
-                                        if (profileResponse.getMsg().equals("true")) {
-                                            // login success
-                                            // TODO: I dont know what else we need to do here
-                                            ProfileManager.activeProfile = profileResponse.getProfile();
-                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
-                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
-                                            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
-
-                                            ((MainActivity) getActivity()).initRegularApp(null);
-                                            getActivity().supportInvalidateOptionsMenu();
-                                        } else {
-                                            if (mSignInClicked) {
-                                                Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public void failure(RetrofitError error) {
-                                        loading.setVisibility(View.GONE);
-                                        Util.makeCroutonText("Could not authenticate user, try again later", getActivity());
-                                    }
-                                });
-                            } else {
-                                // email does not exists, create new user
-                                PioApiController.sendNewUser(getActivity(), email, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId(), PrefUtil.LoginTypes.GOOGLE.name(), new Callback<PioApiResponse>() {
-                                    @Override
-                                    public void success(PioApiResponse pioApiResponse, Response response) {
-                                        loading.setVisibility(View.GONE);
-                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.GOOGLE.name());
-                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, email);
-                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId());
-
-                                        if (pioApiResponse.getCode() == 200) {
-                                            ((MainActivity) getActivity()).initRegularApp(null);
-                                            getActivity().supportInvalidateOptionsMenu();
-                                        } else {
-                                            Util.makeCroutonText("Could not create new user, try again later", getActivity());
-                                        }
-                                    }
-
-                                    @Override
-                                    public void failure(RetrofitError error) {
-                                        loading.setVisibility(View.GONE);
-                                        Util.makeCroutonText("Could not create new user, try again later", getActivity());
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void failure(RetrofitError error) {
-                            loading.setVisibility(View.GONE);
-                            Util.makeCroutonText("Could not authenticate user, try again later", getActivity());
-                        }
-                    });
-                }
-            }
-
-
-        } else {
-            // need email, should fail here
-            loading.setVisibility(View.GONE);
-            Util.makeCroutonText("Could not authenticate user, try again later", getActivity());
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        loading.setVisibility(View.GONE);
-        if (!mIntentInProgress) {
-            if (mSignInClicked && connectionResult.hasResolution()) {
-                // The user has already clicked 'sign-in' so we attempt to resolve all
-                // errors until the user is signed in, or they cancel.
-                try {
-                    connectionResult.startResolutionForResult(getActivity(), RC_SIGN_IN);
-                    mIntentInProgress = true;
-                } catch (IntentSender.SendIntentException e) {
-                    // The intent was canceled before it was sent.  Return to the default
-                    // state and attempt to connect to get an updated ConnectionResult.
-                    mIntentInProgress = false;
-                    mGoogleApiClient.connect();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int responseCode, Intent intent) {
-        if (requestCode == RC_SIGN_IN) {
-            if (responseCode != Activity.RESULT_OK) {
-                mSignInClicked = false;
-            }
-
-            mIntentInProgress = false;
-
-            if (!mGoogleApiClient.isConnected()) {
-                mGoogleApiClient.reconnect();
-            }
-        }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private void expandEmailSignIn() {

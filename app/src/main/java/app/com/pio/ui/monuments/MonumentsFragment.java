@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,8 @@ public class MonumentsFragment extends Fragment {
         root = inflater.inflate(R.layout.fragment_monuments, container, false);
         ButterKnife.inject(this, root);
 
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 //        final ArrayList<CityItem> cityItems = new ArrayList<CityItem>();
 //        ArrayList<MonumentItem> bostonItems = new ArrayList<>();
 //        bostonItems.add(new MonumentItem("Old North Church", "Boston, MA", true, R.drawable.old_north_church_bw, R.drawable.old_north_church, null));
@@ -62,6 +65,6 @@ public class MonumentsFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle("Monuments");
+        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle("Monuments");
     }
 }

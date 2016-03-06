@@ -29,6 +29,7 @@ public class ProfileManager {
                 PrefUtil.getPref(context, "PROFILE_NAME", null),
                 PrefUtil.getPref(context, "PROFILE_EMAIL", null),
                 PrefUtil.getPref(context, "PROFILE_PASS", null),
+                PrefUtil.getPref(context, "PROFILE_FACEBOOK_ACCESS_TOKEN", null),
                 PrefUtil.getPref(context, "PROFILE_IMAGE", null),
                 PrefUtil.getPref(context, "PROFILE_PREMIUM", false),
                 monuments,
@@ -55,6 +56,7 @@ public class ProfileManager {
         PrefUtil.savePref(context, "PROFILE_NAME", activeProfile.getName());
         PrefUtil.savePref(context, "PROFILE_EMAIL", activeProfile.getEmail());
         PrefUtil.savePref(context, "PROFILE_PASS", activeProfile.getPass());
+        PrefUtil.savePref(context, "PROFILE_FACEBOOK_ACCESS_TOKEN", activeProfile.getFacebook().getAccessToken());
         PrefUtil.savePref(context, "PROFILE_IMAGE", activeProfile.getImage());
         PrefUtil.savePref(context, "PROFILE_PREMIUM", activeProfile.isPremium());
         PrefUtil.savePref(context, "PROFILE_MONUMENTS", new HashSet<String>(activeProfile.getMonuments()));

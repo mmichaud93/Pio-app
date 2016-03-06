@@ -25,6 +25,7 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -46,6 +47,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.android.gms:play-services:7.5.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.+'
     compile('com.crashlytics.sdk.android:crashlytics:2.3.2@aar') {
         transitive = true;
     }

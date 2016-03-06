@@ -4,9 +4,9 @@
     <color name="app_primary_dark">#0277BD</color>
     <color name="app_primary_light">#81D4FA</color>
 
-    <color name="app_accent">#9C27B0</color>
-    <color name="app_accent_light">#BA68C8</color>
-    <color name="app_accent_dark">#7B1FA2</color>
+    <color name="app_accent">#FFB700</color>
+    <color name="app_accent_dark">#D09500</color>
+    <color name="app_accent_light">#FFC83C</color>
 
     <color name="disabled_gray">#EFEFEF</color>
     <color name="disabled_gray_text">#BFBFBF</color>
@@ -21,10 +21,6 @@
 
     <color name="warn_color">#FFC107</color>
     <color name="warn_color_pressed">#FFB300</color>
-
-    <color name="yellow">#FBC02D</color>
-    <color name="yellow_dark">#FBC02D</color>
-    <color name="yellow_light">#FFEB3B</color>
 
     <color name="gps_grey">#888888</color>
     <color name="text_color">#303030</color>

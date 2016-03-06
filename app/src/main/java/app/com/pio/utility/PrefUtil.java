@@ -16,17 +16,21 @@ public class PrefUtil {
     public static final String PREFS_LOGIN_TYPE_KEY = "TYPE";
     public static final String PREFS_LOGIN_EMAIL_KEY = "EMAIL";
     public static final String PREFS_LOGIN_PASSWORD_KEY = "PASSWORD";
+    public static final String PREFS_FACEBOOK_TOKEN = "FB_TOKEN";
 
     public static final String PREFS_STATS_AREA_KEY = "AREA";
     public static final String PREFS_STATS_TIME_KEY = "TIME";
     public static final String PREFS_STATS_DISTANCE_KEY = "DISTANCE";
 
     public enum LoginTypes {
-        GOOGLE, EMAIL
+        FACEBOOK, EMAIL
     }
 
 
     public static void savePref(Context context, String key, String value) {
+        if (value == null) {
+            return;
+        }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putString(key, encryptText(value)).apply();
     }
@@ -52,6 +56,9 @@ public class PrefUtil {
     }
 
     public static void savePref(Context context, String key, Set<String> value) {
+        if (value == null) {
+            return;
+        }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putStringSet(key, value).apply();
     }
@@ -124,7 +131,7 @@ public class PrefUtil {
 
     private static final String KEY = "tomlisi-makipilley-matthewmichaud";
 
-    private static String encryptText(String text) {
+    public static String encryptText(String text) {
         return new String(Base64.encode(xor(text.getBytes()), 0));
     }
 

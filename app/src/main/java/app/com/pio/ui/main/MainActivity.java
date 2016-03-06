@@ -2,6 +2,7 @@ package app.com.pio.ui.main;
 
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -12,9 +13,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.facebook.FacebookSdk;
 
 import app.com.pio.api.PioApiResponse;
 import app.com.pio.api.ProfileResponse;
@@ -25,6 +30,7 @@ import app.com.pio.ui.map.RecordUtil;
 import app.com.pio.ui.monuments.MonumentsFragment;
 import app.com.pio.ui.settings.SettingsActivity;
 import app.com.pio.ui.stats.StatsFragment;
+import app.com.pio.utility.Util;
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
@@ -57,6 +63,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     ListView drawerList;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
+    @InjectView(R.id.main_level_parent)
+    LinearLayout mainLevelParent;
+    @InjectView(R.id.main_level_text)
+    TextView mainLevelText;
+    @InjectView(R.id.main_level_progress)
+    TextView mainLevelProgress;
+    @InjectView(R.id.main_level_bar_parent)
+    FrameLayout mainLevelBarParent;
+    @InjectView(R.id.main_level_bar)
+    View mainLevelBar;
+
     boolean isInLogin = false;
     int currentPosition = 1;
 
@@ -70,7 +87,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         ProfileManager.loadActiveProfile(getApplicationContext());
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    getSupportActionBar().setTitle("Pio");
+                }
+            }
+        });
 
         if(PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_TYPE_KEY, null) == null ||
                 PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_EMAIL_KEY, null) == null ||
@@ -87,7 +116,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     protected void onResume() {
         super.onResume();
 
-        updateDrawerHeader();
+        updatePlayerViews();
     }
 
     @Override
@@ -109,45 +138,45 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void initRegularApp(Bundle savedInstanceState) {
         isInLogin = false;
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+//        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, PioMapFragment.newInstance(null))
                     .commit();
         }
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (drawerLayout.isDrawerOpen(Gravity.START)) {
-                    drawerLayout.closeDrawers();
-                    toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
-                } else {
-                    drawerLayout.openDrawer(Gravity.START);
-                    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-                }
-            }
-        });
+//        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
+//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (drawerLayout.isDrawerOpen(Gravity.START)) {
+//                    drawerLayout.closeDrawers();
+//                    toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
+//                } else {
+//                    drawerLayout.openDrawer(Gravity.START);
+//                    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+//                }
+//            }
+//        });
 
-        String[] navBarItems = getResources().getStringArray(R.array.nav_bar_items);
-        TypedArray navBarIcons = getResources().obtainTypedArray(R.array.nav_bar_icons);
-        drawerLayout.setDrawerListener(this);
+//        String[] navBarItems = getResources().getStringArray(R.array.nav_bar_items);
+//        TypedArray navBarIcons = getResources().obtainTypedArray(R.array.nav_bar_icons);
+//        drawerLayout.setDrawerListener(this);
 
-        items = new ArrayList<DrawerItem>();
+//        items = new ArrayList<DrawerItem>();
         //get profile object - mock up for now
         //newprofile model ...
-        items.add(new DrawerHeaderItem());
-        for (int i = 0; i < navBarItems.length; i++) {
-            items.add(new DrawerListItem(navBarItems[i], navBarIcons.getResourceId(i, -1)));
-        }
+//        items.add(new DrawerHeaderItem());
+//        for (int i = 0; i < navBarItems.length; i++) {
+//            items.add(new DrawerListItem(navBarItems[i], navBarIcons.getResourceId(i, -1)));
+//        }
 
-        drawerAdapter = new DrawerAdapter(this, items);
-        drawerList.setAdapter(drawerAdapter);
-        drawerList.setOnItemClickListener(this);
+//        drawerAdapter = new DrawerAdapter(this, items);
+//        drawerList.setAdapter(drawerAdapter);
+//        drawerList.setOnItemClickListener(this);
 
         // login in the background
+        mainLevelParent.setVisibility(View.VISIBLE);
         PioApiController.loginUser(this,
                 PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_EMAIL_KEY, null),
                 PrefUtil.getPref(this, PrefUtil.PREFS_LOGIN_PASSWORD_KEY, null),
@@ -161,19 +190,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         if (ProfileManager.activeProfile == null) {
                             ProfileManager.activeProfile = profileResponse.getProfile();
                             ProfileManager.saveActiveProfile();
-                            updateDrawerHeader();
+                            updatePlayerViews();
                         } else {
                             if (profileResponse.getProfile().getLastUpdated() > ProfileManager.activeProfile.getLastUpdated()) {
                                 ProfileManager.activeProfile = profileResponse.getProfile();
                                 ProfileManager.saveActiveProfile();
-                                updateDrawerHeader();
+                                updatePlayerViews();
                             } else {
                                 // the profile item on the server is out of data and we need to push the local copy to the server,
                                 // this will happen a very large majority of the time
                                 PioApiController.pushUser(ProfileManager.activeProfile, new Callback<PioApiResponse>() {
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
-                                        updateDrawerHeader();
+                                        updatePlayerViews();
                                     }
 
                                     @Override
@@ -194,9 +223,21 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 });
     }
 
-    private void updateDrawerHeader() {
+    private void updatePlayerViews() {
         if (drawerAdapter!=null) {
             drawerAdapter.notifyDataSetChanged();
+        }
+        if (ProfileManager.activeProfile != null) {
+            mainLevelText.setText("Level: " + Util.getLevelFromXP(ProfileManager.activeProfile.getXp()));
+//            mainLevelProgress.setText(
+//                    ProfileManager.activeProfile.getXp() + ((RecordUtil.getGainedXP() == 0) ? "" : " (+"+RecordUtil.getGainedXP()+")")
+//                            + "/" + (int)(ProfileManager.activeProfile.getXp()/Util.getExcessXP(ProfileManager.activeProfile.getXp())));
+            mainLevelProgress.setText((int)(Util.getExcessXP(ProfileManager.activeProfile.getXp()) * 100) + "%");
+
+            mainLevelBar.setLayoutParams(
+                    new FrameLayout.LayoutParams(
+                            (int) (mainLevelBarParent.getWidth() * Util.getExcessXP(ProfileManager.activeProfile.getXp())),
+                            (int) Util.dpToPx(12, this)));
         }
     }
 
@@ -209,15 +250,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
+            return true;
+        } else if (id == android.R.id.home) {
+            getSupportFragmentManager().popBackStack();
             return true;
         }
 
@@ -253,7 +294,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, PioMapFragment.newInstance(args)).commit();
                 drawerLayout.closeDrawers();
                 break;
-            case 2: // monumnets
+            case 2: // monuments
                 cleanActionBar();
                 getSupportFragmentManager().beginTransaction().replace(R.id.container, MonumentsFragment.newInstance()).commit();
                 drawerLayout.closeDrawers();

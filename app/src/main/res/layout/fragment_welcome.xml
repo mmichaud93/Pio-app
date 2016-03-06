@@ -55,12 +55,14 @@
         android:padding="16dp"
         android:visibility="gone">
 
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/sign_in_button_google"
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/sign_in_button_facebook"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_gravity="center"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"/>
 
         <Button
             android:id="@+id/sign_in_button_email"

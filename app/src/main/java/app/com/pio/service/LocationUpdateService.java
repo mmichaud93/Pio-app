@@ -141,7 +141,7 @@ public class LocationUpdateService extends Service {
                 RecordUtil.setDistanceTravelled(RecordUtil.getDistanceTravelled() + distance);
 
                 if (distance <= 0.001) {
-                    if (location.getSpeed() > 5) {
+                    if (location.getSpeed() > 3) {
                         for (int i = 0; i < speed; i++) {
                             registerLocationChange(new LatLng(
                                     (float) (previousLocation.getLatitude() + (location.getLatitude() - previousLocation.getLatitude()) / location.getSpeed() * i),
@@ -151,8 +151,6 @@ public class LocationUpdateService extends Service {
                     } else {
                         registerLocationChange(location);
                     }
-
-
                 } else {
                     registerLocationChange(location);
                 }

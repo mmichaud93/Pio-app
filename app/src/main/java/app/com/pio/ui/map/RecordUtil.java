@@ -77,15 +77,18 @@ public class RecordUtil {
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
                     public void onConnected(Bundle bundle) {
+                        Log.d("TAG", "connected");
                     }
 
                     @Override
                     public void onConnectionSuspended(int i) {
+                        Log.d("TAG", "onConnectionSuspended: "+i);
                     }
                 })
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult connectionResult) {
+                        Log.d("TAG", "onConnectionFailed: "+connectionResult.toString());
                     }
                 })
                 .build();
