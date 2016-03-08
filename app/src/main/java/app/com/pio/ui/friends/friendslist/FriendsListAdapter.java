@@ -1,0 +1,118 @@
+package app.com.pio.ui.friends.friendslist;
+
+import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
+import app.com.pio.R;
+import app.com.pio.api.FriendsProfileResponse;
+import app.com.pio.api.PioApiController;
+import app.com.pio.features.monuments.MonumentManager;
+import app.com.pio.ui.FlowLayout;
+import app.com.pio.utility.Util;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
+/**
+ * Created by mmichaud on 3/6/16.
+ */
+public class FriendsListAdapter extends ArrayAdapter<FriendsListItem> {
+
+    private static final String TAG = FriendsListAdapter.class.getName();
+
+    public FriendsListAdapter(Context context, int resource, List<FriendsListItem> objects) {
+        super(context, resource, objects);
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        final ViewHolder viewHolder;
+        if(convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_friends_list_item, null);
+            viewHolder = new ViewHolder();
+            viewHolder.name = (TextView) convertView.findViewById(R.id.friends_list_name);
+            viewHolder.percent = (TextView) convertView.findViewById(R.id.friends_list_percent);
+            viewHolder.level = (TextView) convertView.findViewById(R.id.friends_list_level);
+            viewHolder.profileImage = (ImageView) convertView.findViewById(R.id.friends_list_profile_image);
+            viewHolder.levelBar = convertView.findViewById(R.id.friends_list_level_bar);
+            viewHolder.levelBarParent = (FrameLayout) convertView.findViewById(R.id.friends_list_level_bar_parent);
+            viewHolder.monumentsNone = (TextView) convertView.findViewById(R.id.friends_list_monuments_none);
+            viewHolder.monumentsListParent = (FlowLayout) convertView.findViewById(R.id.friends_list_monuments_list);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+        Log.d(TAG, "id : "+getItem(position).getUserId());
+        PioApiController.getFriendsProfile(getItem(position).getUserId(), new Callback<FriendsProfileResponse>() {
+            @Override
+            public void success(FriendsProfileResponse friendsProfileResponse, Response response) {
+                Log.d(TAG, "viewHolder to string: "+viewHolder.toString());
+                Log.d(TAG, "name : "+friendsProfileResponse.getFriendsProfile().getName());
+                viewHolder.level.setText("Level: " + Util.getLevelFromXP(friendsProfileResponse.getFriendsProfile().getXp()));
+                viewHolder.levelBar.setLayoutParams(
+                        new FrameLayout.LayoutParams(
+                                (int) (viewHolder.levelBarParent.getWidth() * Util.getExcessXP(friendsProfileResponse.getFriendsProfile().getXp())),
+                                (int) Util.dpToPx(12, getContext())));
+                viewHolder.percent.setText((int)(Util.getExcessXP(friendsProfileResponse.getFriendsProfile().getXp()) * 100) + "%");
+                if (friendsProfileResponse.getFriendsProfile().getMonuments().size() == 0) {
+                    viewHolder.monumentsNone.setVisibility(View.VISIBLE);
+                } else {
+                    viewHolder.monumentsListParent.setVisibility(View.VISIBLE);
+                    for (String monument : friendsProfileResponse.getFriendsProfile().getMonuments()) {
+                        int resource = MonumentManager.getMonumentImage(monument);
+                        if (resource != -1) {
+                            ImageView imageView = new ImageView(getContext());
+                            FlowLayout.LayoutParams layoutParams = new FlowLayout.LayoutParams((int) Util.dpToPx(32, getContext()), (int) Util.dpToPx(32, getContext()));
+                            layoutParams.setMargins(
+                                    (int) Util.dpToPx(4, getContext()),
+                                    (int) Util.dpToPx(4, getContext()),
+                                    (int) Util.dpToPx(4, getContext()),
+                                    (int) Util.dpToPx(4, getContext())
+                            );
+                            imageView.setLayoutParams(layoutParams);
+                            imageView.setImageResource(resource);
+                            viewHolder.monumentsListParent.addView(imageView);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(TAG, "error: " + error.toString());
+            }
+        });
+        viewHolder.name.setText(getItem(position).getName());
+        viewHolder.level.setText("Level: "+ Util.getLevelFromXP(getItem(position).getXp()));
+        viewHolder.percent.setText((int)(Util.getExcessXP(getItem(position).getXp()) * 100) + "%");
+        viewHolder.levelBar.setLayoutParams(
+                new FrameLayout.LayoutParams(
+                        (int) (viewHolder.levelBarParent.getWidth() * Util.getExcessXP(getItem(position).getXp())),
+                        (int) Util.dpToPx(12, getContext())));
+        Picasso.with(getContext()).load(getItem(position).getProfileImageUrl()).into(viewHolder.profileImage);
+
+        return convertView;
+    }
+
+    private static class ViewHolder {
+        TextView name;
+        TextView percent;
+        TextView level;
+        ImageView profileImage;
+        View levelBar;
+        FrameLayout levelBarParent;
+        TextView monumentsNone;
+        FlowLayout monumentsListParent;
+    }
+}

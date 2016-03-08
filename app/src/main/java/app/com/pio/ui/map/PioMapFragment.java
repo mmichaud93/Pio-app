@@ -50,7 +50,7 @@ import app.com.pio.service.LocationUpdateService;
 import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.ui.monuments.MonumentsFragment;
-import app.com.pio.ui.stats.StatsFragment;
+import app.com.pio.ui.friends.FriendsFragment;
 import app.com.pio.utility.AnimUtil;
 import app.com.pio.utility.Util;
 import butterknife.ButterKnife;
@@ -165,7 +165,7 @@ public class PioMapFragment extends Fragment {
         friendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, StatsFragment.newInstance(), "Stats").addToBackStack("Stats").commit();
+                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, FriendsFragment.newInstance(), "Friends").addToBackStack("Friends").commit();
             }
         });
 

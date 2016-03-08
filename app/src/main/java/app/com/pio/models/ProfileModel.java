@@ -60,11 +60,11 @@ public class ProfileModel {
         this.lastUpdated = lastUpdated;
     }
 
-    public ProfileModel(String name, String email, String pass, String facebookAccessToken, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
+    public ProfileModel(String name, String email, String pass, String facebookUserId, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
         this.name = name;
         this.email = email;
         this.pass = pass;
-        this.facebook = new FacebookPart(facebookAccessToken);
+        this.facebook = new FacebookPart(facebookUserId);
         this.image = image;
         this.premium = premium;
         this.monuments = monuments;
@@ -113,8 +113,8 @@ public class ProfileModel {
         this.facebook = facebook;
     }
 
-    public void setFacebook(String facebookAccessToken) {
-        this.facebook = new FacebookPart(facebookAccessToken);
+    public void setFacebook(String facebookUserId) {
+        this.facebook = new FacebookPart(facebookUserId);
     }
 
     public String getImage() {
@@ -180,19 +180,19 @@ public class ProfileModel {
     public class FacebookPart {
 
         @Expose
-        @SerializedName("access_token")
-        String accessToken;
+        @SerializedName("user_id")
+        String userId;
 
-        public FacebookPart(String accessToken) {
-            this.accessToken = accessToken;
+        public FacebookPart(String userId) {
+            this.userId = userId;
         }
 
-        public String getAccessToken() {
-            return accessToken;
+        public String getUserId() {
+            return userId;
         }
 
-        public void setAccessToken(String accessToken) {
-            this.accessToken = accessToken;
+        public void setUserId(String userId) {
+            this.userId = userId;
         }
     }
 }

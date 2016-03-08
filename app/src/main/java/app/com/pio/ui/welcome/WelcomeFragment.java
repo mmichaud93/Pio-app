@@ -188,10 +188,7 @@ public class WelcomeFragment extends Fragment {
         });
 
         signInButtonFacebook.setReadPermissions("user_friends");
-        // If using in a fragment
-        // Other app specific specialization
         callbackManager = CallbackManager.Factory.create();
-        // Callback registration
         signInButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(final LoginResult loginResult) {
@@ -212,7 +209,7 @@ public class WelcomeFragment extends Fragment {
                                                 if (profileResponse.getMsg().equals("true")) {
                                                     // login success
                                                     ProfileManager.activeProfile = profileResponse.getProfile();
-                                                    ProfileManager.activeProfile.setFacebook(loginResult.getAccessToken().getToken());
+                                                    ProfileManager.activeProfile.setFacebook(loginResult.getAccessToken().getUserId());
                                                     PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.FACEBOOK.name());
                                                     PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, loginResult.getAccessToken().getUserId());
                                                     PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, PrefUtil.encryptText(loginResult.getAccessToken().getUserId()));
@@ -242,7 +239,7 @@ public class WelcomeFragment extends Fragment {
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_FACEBOOK_TOKEN, loginResult.getAccessToken().getToken());
 
                                 PioApiController.sendNewUser(getActivity(), loginResult.getAccessToken().getUserId(), PrefUtil.encryptText(loginResult.getAccessToken().getUserId()),
-                                        PrefUtil.LoginTypes.FACEBOOK.name(), loginResult.getAccessToken().getToken(), new Callback<PioApiResponse>() {
+                                        PrefUtil.LoginTypes.FACEBOOK.name(), loginResult.getAccessToken().getUserId(), new Callback<PioApiResponse>() {
                                             @Override
                                             public void success(PioApiResponse pioApiResponse, Response response) {
                                                 loading.setVisibility(View.GONE);
@@ -273,12 +270,10 @@ public class WelcomeFragment extends Fragment {
 
             @Override
             public void onCancel() {
-                // App code
             }
 
             @Override
             public void onError(FacebookException exception) {
-                // App code
                 Log.d(TAG, "Could not log in with facebook. onError: "+exception.getMessage());
                 Util.makeCroutonText("Could not sign in with Facebook, please try again later", getActivity());
             }

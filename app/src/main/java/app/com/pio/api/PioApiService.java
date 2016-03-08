@@ -5,6 +5,7 @@ import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.POST;
+import retrofit.http.Path;
 import retrofit.http.Query;
 
 /**
@@ -13,13 +14,16 @@ import retrofit.http.Query;
 public interface PioApiService {
 
     @GET("/users/new")
-    public void newUser(@Query("email") String email, @Query("pass") String pass, @Query("type") String type, @Query("fb_access_token") String fbAccessToken,
-                        @Query("device_name") String name, @Query("device_os") String deviceOs, @Query("device_app_ver") String deviceAppVer,
-                        @Query("device_screen_width") int width, @Query("device_screen_height") int height, @Query("device_screen_ppi") float ppi,
-                        Callback<PioApiResponse> callback);
+    public void newUser(@Query("email") String email, @Query("pass") String pass, @Query("type") String type,
+                        @Query("fb_user_id") String fbUserToken, @Query("device_name") String name, @Query("device_os") String deviceOs,
+                        @Query("device_app_ver") String deviceAppVer, @Query("device_screen_width") int width, @Query("device_screen_height") int height,
+                        @Query("device_screen_ppi") float ppi, Callback<PioApiResponse> callback);
 
     @GET("/users/exist")
     public void userExist(@Query("email") String email, Callback<PioApiResponse> callback);
+
+    @GET("/users/fb/exists")
+    public void fbUserIdInUse(@Query("fb_user_id") String fbUserId, Callback<PioApiResponse> callback);
 
     @GET("/users/login")
     public void loginUser(@Query("email") String email, @Query("pass") String pass,
@@ -29,4 +33,7 @@ public interface PioApiService {
 
     @POST("/users/push")
     public void pushUser(@Body ProfileModel profile, Callback<PioApiResponse> callback);
+
+    @GET("/users/fb/get/{fb_user_id}")
+    public void getFriendsProfile(@Path("fb_user_id") String fbUserId, Callback<FriendsProfileResponse> callback);
 }

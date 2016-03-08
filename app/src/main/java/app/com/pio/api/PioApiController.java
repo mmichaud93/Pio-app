@@ -41,12 +41,12 @@ public class PioApiController {
         }
     }
 
-    public static void sendNewUser(Activity activity, String email, String pass, String type, String facebookAccessToken, Callback<PioApiResponse> callback) {
+    public static void sendNewUser(Activity activity, String email, String pass, String type, String facebookUserId, Callback<PioApiResponse> callback) {
         Display display = activity.getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         try {
-            pioApiService.newUser(email, pass, type, facebookAccessToken, Build.MODEL, "android " + Build.VERSION.RELEASE,
+            pioApiService.newUser(email, pass, type, facebookUserId, Build.MODEL, "android " + Build.VERSION.RELEASE,
                     activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0).versionName,
                     size.x, size.y, activity.getResources().getDisplayMetrics().density, callback);
         } catch (PackageManager.NameNotFoundException e) {
@@ -57,6 +57,10 @@ public class PioApiController {
 
     public static void userExists(String email, Callback<PioApiResponse> callback) {
         pioApiService.userExist(email, callback);
+    }
+
+    public static void fbUserIdInUse(String fbUserId, Callback<PioApiResponse> callback) {
+        pioApiService.fbUserIdInUse(fbUserId, callback);
     }
 
     public static void loginUser(Activity activity, String email, String pass, Callback<ProfileResponse> callback) {
@@ -74,5 +78,9 @@ public class PioApiController {
 
     public static void pushUser(ProfileModel profile, Callback<PioApiResponse> callback) {
         pioApiService.pushUser(profile, callback);
+    }
+
+    public static void getFriendsProfile(String fbUserId, Callback<FriendsProfileResponse> callback) {
+        pioApiService.getFriendsProfile(fbUserId, callback);
     }
 }

@@ -1,14 +1,14 @@
 package app.com.pio.ui.main;
 
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
+import android.support.multidex.MultiDex;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +29,7 @@ import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.ui.map.RecordUtil;
 import app.com.pio.ui.monuments.MonumentsFragment;
 import app.com.pio.ui.settings.SettingsActivity;
-import app.com.pio.ui.stats.StatsFragment;
+import app.com.pio.ui.friends.FriendsFragment;
 import app.com.pio.utility.Util;
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
@@ -38,9 +38,7 @@ import app.com.pio.R;
 import app.com.pio.database.MVDatabase;
 import app.com.pio.ui.welcome.WelcomeFragment;
 import app.com.pio.ui.main.drawer.DrawerAdapter;
-import app.com.pio.ui.main.drawer.DrawerHeaderItem;
 import app.com.pio.ui.main.drawer.DrawerItem;
-import app.com.pio.ui.main.drawer.DrawerListItem;
 import app.com.pio.ui.map.PioMapFragment;
 import app.com.pio.ui.profile.PioProfileFragment;
 import app.com.pio.utility.PrefUtil;
@@ -51,16 +49,8 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 
-public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener,
-        DrawerLayout.DrawerListener {
+public class MainActivity extends ActionBarActivity {
 
-    private ArrayList<DrawerItem> items;
-    private DrawerAdapter drawerAdapter;
-
-    @InjectView(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-    @InjectView(R.id.drawer_list)
-    ListView drawerList;
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
     @InjectView(R.id.main_level_parent)
@@ -113,6 +103,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -128,7 +124,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void initLogin(Bundle savedInstanceState) {
         isInLogin = true;
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, WelcomeFragment.newInstance())
@@ -138,42 +133,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void initRegularApp(Bundle savedInstanceState) {
         isInLogin = false;
-//        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, PioMapFragment.newInstance(null))
                     .commit();
         }
-
-//        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
-//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (drawerLayout.isDrawerOpen(Gravity.START)) {
-//                    drawerLayout.closeDrawers();
-//                    toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
-//                } else {
-//                    drawerLayout.openDrawer(Gravity.START);
-//                    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-//                }
-//            }
-//        });
-
-//        String[] navBarItems = getResources().getStringArray(R.array.nav_bar_items);
-//        TypedArray navBarIcons = getResources().obtainTypedArray(R.array.nav_bar_icons);
-//        drawerLayout.setDrawerListener(this);
-
-//        items = new ArrayList<DrawerItem>();
-        //get profile object - mock up for now
-        //newprofile model ...
-//        items.add(new DrawerHeaderItem());
-//        for (int i = 0; i < navBarItems.length; i++) {
-//            items.add(new DrawerListItem(navBarItems[i], navBarIcons.getResourceId(i, -1)));
-//        }
-
-//        drawerAdapter = new DrawerAdapter(this, items);
-//        drawerList.setAdapter(drawerAdapter);
-//        drawerList.setOnItemClickListener(this);
 
         // login in the background
         mainLevelParent.setVisibility(View.VISIBLE);
@@ -183,31 +148,28 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 new Callback<ProfileResponse>() {
                     @Override
                     public void success(ProfileResponse profileResponse, Response response) {
-                        Log.d("PIO", "[MainActivity] successfully logged in!");
+                        updatePlayerViews();
                         if (profileResponse.getProfile() == null) {
                             return;
                         }
                         if (ProfileManager.activeProfile == null) {
                             ProfileManager.activeProfile = profileResponse.getProfile();
                             ProfileManager.saveActiveProfile();
-                            updatePlayerViews();
                         } else {
                             if (profileResponse.getProfile().getLastUpdated() > ProfileManager.activeProfile.getLastUpdated()) {
                                 ProfileManager.activeProfile = profileResponse.getProfile();
                                 ProfileManager.saveActiveProfile();
-                                updatePlayerViews();
                             } else {
                                 // the profile item on the server is out of data and we need to push the local copy to the server,
                                 // this will happen a very large majority of the time
                                 PioApiController.pushUser(ProfileManager.activeProfile, new Callback<PioApiResponse>() {
                                     @Override
                                     public void success(PioApiResponse pioApiResponse, Response response) {
-                                        updatePlayerViews();
                                     }
 
                                     @Override
                                     public void failure(RetrofitError error) {
-                                        Log.d("PIO", "[MainActivity] could not push profile to server");
+                                        // fail quietly because we can just push this later, no biggie
                                     }
                                 });
                             }
@@ -216,22 +178,22 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
                     @Override
                     public void failure(RetrofitError error) {
-                        Log.d("PIO", "[MainActivity] could not log in! Requiring a log in next time.");
-                        //PrefUtil.savePref(MainActivity.this, PrefUtil.PREFS_LOGIN_EMAIL_KEY, null);
-                        //PrefUtil.savePref(MainActivity.this, PrefUtil.PREFS_LOGIN_PASSWORD_KEY, null);
+                        updatePlayerViews();
                     }
                 });
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+
+        super.onWindowFocusChanged(hasFocus);
+        updatePlayerViews();
+    }
+
     private void updatePlayerViews() {
-        if (drawerAdapter!=null) {
-            drawerAdapter.notifyDataSetChanged();
-        }
+
         if (ProfileManager.activeProfile != null) {
             mainLevelText.setText("Level: " + Util.getLevelFromXP(ProfileManager.activeProfile.getXp()));
-//            mainLevelProgress.setText(
-//                    ProfileManager.activeProfile.getXp() + ((RecordUtil.getGainedXP() == 0) ? "" : " (+"+RecordUtil.getGainedXP()+")")
-//                            + "/" + (int)(ProfileManager.activeProfile.getXp()/Util.getExcessXP(ProfileManager.activeProfile.getXp())));
             mainLevelProgress.setText((int)(Util.getExcessXP(ProfileManager.activeProfile.getXp()) * 100) + "%");
 
             mainLevelBar.setLayoutParams(
@@ -243,7 +205,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return !isInLogin;
     }
@@ -266,80 +228,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        if(position == currentPosition) {
-            drawerLayout.closeDrawers();
-            return;
-        }
-
-        switch(position) {
-            case 0: // profile
-                cleanActionBar();
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, PioProfileFragment.newInstance()).commit();
-                drawerLayout.closeDrawers();
-                break;
-            case 1: // map
-                cleanActionBar();
-                Bundle args = new Bundle();
-                if(RecordUtil.isRecording()) {
-                    args.putFloat(PioMapFragment.KEY_STRENGTH, RecordUtil.getGpsStrength());
-                    args.putFloat(PioMapFragment.KEY_AREA, RecordUtil.getUncoveredKilometersSquared());
-                    args.putString(PioMapFragment.KEY_LOCATION, RecordUtil.getLocation());
-                    args.putBoolean(PioMapFragment.KEY_RECORDING, RecordUtil.isRecording());
-                    args.putLong(PioMapFragment.KEY_START_TIME, RecordUtil.getSessionTimeStart());
-                } else {
-                    args = null;
-                }
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, PioMapFragment.newInstance(args)).commit();
-                drawerLayout.closeDrawers();
-                break;
-            case 2: // monuments
-                cleanActionBar();
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, MonumentsFragment.newInstance()).commit();
-                drawerLayout.closeDrawers();
-                break;
-            case 3: // stats
-                cleanActionBar();
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, StatsFragment.newInstance()).commit();
-                drawerLayout.closeDrawers();
-                break;
-        }
-
-        currentPosition = position;
-    }
-
-    private void cleanActionBar() {
-        if(getSupportActionBar()!=null) {
-            getSupportActionBar().setTitle(getString(R.string.app_name));
-            getSupportActionBar().setSubtitle("");
-        }
-    }
-
-    @Override
-    public void onDrawerSlide(View drawerView, float slideOffset) {
-
-    }
-
-    @Override
-    public void onDrawerOpened(View drawerView) {
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-    }
-
-    @Override
-    public void onDrawerClosed(View drawerView) {
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
-    }
-
-    @Override
-    public void onDrawerStateChanged(int newState) {
-
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int responseCode, Intent intent) {
         if(isInLogin) {
             ((WelcomeFragment)getSupportFragmentManager().getFragments().get(0)).onActivityResult(requestCode, responseCode, intent);
+            return;
         }
+        // this is going to cause so many problems in the future but I have other things to do now.
+        // It's like this because we need to pass the activity result onto the fragments, in this case specifically the friends fragment
+        // for the Facebook login button.
+        if (getSupportFragmentManager().getFragments().size() > 1) {
+            getSupportFragmentManager().getFragments().get(getSupportFragmentManager().getFragments().size()-1).onActivityResult(requestCode, responseCode, intent);
+        }
+        super.onActivityResult(requestCode, responseCode, intent);
     }
 }

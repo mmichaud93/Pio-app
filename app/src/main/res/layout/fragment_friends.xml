@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/white">
+    <FrameLayout
+        android:id="@+id/crouton_handle"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        android:background="@null"/>
+
+    <LinearLayout
+        android:id="@+id/friends_fb_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/friends_fb_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/friends_no_fb_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/friends_no_fb_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="48dp"
+            android:gravity="center"
+            android:text="Not connected to Facebook.\nSign into Facebook to compete with your friends."
+            android:textColor="@color/text_color"
+            android:textSize="18sp"/>
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/friends_no_fb_button_facebook"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="48dp"
+            android:gravity="center"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/friends_failure_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textColor="@color/text_color_gray"
+        android:text="Could not load friends\nCheck your connection and try again."/>
+
+    <ProgressBar
+        android:id="@+id/friends_loading"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="gone"/>
+
+</RelativeLayout>

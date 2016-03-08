@@ -24,6 +24,7 @@
 
     <color name="gps_grey">#888888</color>
     <color name="text_color">#303030</color>
+    <color name="text_color_gray">#d0d0d0</color>
 
     <color name="header_semi_transparent">#ddfafafa</color>
     <color name="debug_color">#cc81D4FA</color>

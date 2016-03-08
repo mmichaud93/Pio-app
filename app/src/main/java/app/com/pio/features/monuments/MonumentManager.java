@@ -70,6 +70,19 @@ public class MonumentManager {
         }
     }
 
+    public static int getMonumentImage(String monument) {
+
+        for (CityItem cityItem : cities) {
+            for (MonumentItem monumentItem : cityItem.getMonumentItems()) {
+                if (monumentItem.getId().equals(monument)) {
+                    return monumentItem.getBitmapUnlockedLarge();
+                }
+            }
+        }
+
+        return -1;
+    }
+
     public static MonumentItem isInGeoFence(LatLng latLng) {
         for (GeoFenceModel model: geoFences) {
             float[] results = new float[1];

@@ -117,7 +117,7 @@ public class Util {
     public static int getLevelFromXP(int xp) {
         float A = 0.7909f;
         float EXP = 0.3177f;
-        float levelTotal = (float) (A * Math.pow(ProfileManager.activeProfile.getXp(), EXP));
+        float levelTotal = (float) (A * Math.pow(xp, EXP));
         if (levelTotal < 0) {
             levelTotal = 0;
         }
@@ -127,7 +127,7 @@ public class Util {
     public static double getExcessXP(int xp) {
         float A = 0.7909f;
         float EXP = 0.3177f;
-        float levelTotal = (float) (A * Math.pow(ProfileManager.activeProfile.getXp(), EXP));
+        float levelTotal = (float) (A * Math.pow(xp, EXP));
         if (levelTotal < 0) {
             levelTotal = 0;
         }
