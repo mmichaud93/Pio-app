@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -31,6 +32,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -44,13 +46,14 @@ import java.util.List;
 import java.util.Locale;
 
 import app.com.pio.R;
+import app.com.pio.database.MVDatabase;
 import app.com.pio.features.monuments.MonumentManager;
 import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.service.LocationUpdateService;
+import app.com.pio.ui.friends.FriendsFragment;
 import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.ui.monuments.MonumentsFragment;
-import app.com.pio.ui.friends.FriendsFragment;
 import app.com.pio.utility.AnimUtil;
 import app.com.pio.utility.Util;
 import butterknife.ButterKnife;
@@ -158,14 +161,14 @@ public class PioMapFragment extends Fragment {
         monumentsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, MonumentsFragment.newInstance(), "Monuments").addToBackStack("Monuments").commit();
+                getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_from_left, R.anim.abc_fade_out, R.anim.abc_fade_in, R.anim.slide_out_to_left).add(R.id.container, MonumentsFragment.newInstance(), "Monuments").addToBackStack("Monuments").commit();
             }
         });
 
         friendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.container, FriendsFragment.newInstance(), "Friends").addToBackStack("Friends").commit();
+                getActivity().getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_from_left, R.anim.abc_fade_out, R.anim.abc_fade_in, R.anim.slide_out_to_left).add(R.id.container, FriendsFragment.newInstance(), "Friends").addToBackStack("Friends").commit();
             }
         });
 
@@ -333,22 +336,38 @@ public class PioMapFragment extends Fragment {
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
-//                    if (firstLatLng==null) {
+//                    if (firstLatLng == null) {
 //                        firstLatLng = latLng;
 //                        return;
 //                    }
-//                    firstLatLng = new LatLng(latLng.latitude+0.005, latLng.longitude);
-//                    for(int i = 0; i < 1000; i++) {
-//                        MVDatabase.storePoint((float) (firstLatLng.latitude+(latLng.latitude - firstLatLng.latitude)/1000*i)
-//                                , (float) (firstLatLng.longitude+(latLng.longitude - firstLatLng.longitude)/1000*i), true);
+//                    firstLatLng = new LatLng(latLng.latitude + 0.00125, latLng.longitude+ 0.00125);
+//                    for (int i = 0; i < 500; i++) {
+//                        for (int r = 0; r < 500; r++) {
+//                            if (MVDatabase.storePoint((float) (firstLatLng.latitude + (latLng.latitude - firstLatLng.latitude) / 250 * r)
+//                                    , (float) (firstLatLng.longitude + (latLng.longitude - firstLatLng.longitude) / 250 * i), true)) {
+//                                float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
+//                                RecordUtil.recordPoint(uncoveredArea);
+//                                ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + 1);
+//
+//                                List<Address> addresses;
+//
+//                                if (getLocationTime < System.currentTimeMillis()) {
+//                                    try {
+//                                        addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+//                                        if (addresses.size() > 0) {
+//                                            String city = addresses.get(0).getLocality(); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+//                                            String province = addresses.get(0).getAdminArea();
+//                                            String countryName = addresses.get(0).getCountryName();
+//                                            ProfileManager.activeProfile.addCityPoint(city, province, countryName);
+//                                        }
+//                                    } catch (IOException e) {
+//                                        e.printStackTrace();
+//                                        getLocationTime = System.currentTimeMillis() + 15000;
+//                                    }
+//                                }
+//                            }
+//                        }
 //                    }
-//                    firstLatLng = new LatLng(latLng.latitude, latLng.longitude+0.005);
-//                    for(int i = 0; i < 1000; i++) {
-//                        MVDatabase.storePoint((float) (firstLatLng.latitude+(latLng.latitude - firstLatLng.latitude)/1000*i)
-//                                , (float) (firstLatLng.longitude+(latLng.longitude - firstLatLng.longitude)/1000*i), true);
-//                    }
-//                    firstLatLng = null;
-//                    Log.d("PIO", "ll.lat: " + latLng.latitude + ", ll.lon: " + latLng.longitude);
                     overlay.clearTileCache();
                 }
             });
@@ -408,24 +427,25 @@ public class PioMapFragment extends Fragment {
                                 bar1.setBackgroundResource(R.drawable.gps_accuracy_empty);
                             }
 
-                            List<Address> addresses;
-
-                            if (getLocationTime < System.currentTimeMillis()) {
-                                try {
-                                    addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                    if (addresses.size() > 0) {
-                                        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                        locationText.setText(address);
-                                        RecordUtil.setLocation(address);
-                                    } else {
-                                        locationText.setText(getString(R.string.unknown));
-                                        RecordUtil.setLocation(getString(R.string.unknown));
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    getLocationTime = System.currentTimeMillis() + 15000;
-                                }
-                            }
+//                            List<Address> addresses;
+//
+//                            if (getLocationTime < System.currentTimeMillis()) {
+//                                try {
+//                                    addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+//                                    if (addresses.size() > 0) {
+//                                        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+//                                        locationText.setText(address);
+//                                        RecordUtil.setLocation(address);
+//                                    } else {
+//                                        locationText.setText(getString(R.string.unknown));
+//                                        RecordUtil.setLocation(getString(R.string.unknown));
+//                                    }
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                    getLocationTime = System.currentTimeMillis() + 15000;
+//                                }
+//                            }
+                            RecordUtil.setLocation(RecordUtil.getLocation());
                             xpText.setText(getString(R.string.xp, RecordUtil.getGainedXP()));
 //                            areaText.setText(getString(R.string.area_km, areaFormat.format(RecordUtil.getUncoveredKilometersSquared())));
                         }
@@ -485,6 +505,11 @@ public class PioMapFragment extends Fragment {
                         .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bm, (int) Util.dpToPx(48, getActivity()), (int) Util.dpToPx(48, getActivity()), false)))
                         .title(monument.getName());
                 markers.add(googleMap.addMarker(marker));
+//                googleMap.addCircle(new CircleOptions().center(new LatLng(monument.getPinLat(), monument.getPinLong()))
+//                                .radius(monument.getRadius())
+//                                .fillColor(getResources().getColor(R.color.debug_color))
+//                                .strokeWidth(0)
+//                );
             }
         }
     }

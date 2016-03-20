@@ -14,6 +14,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 import app.com.pio.R;
+import app.com.pio.features.friends.FriendsDBHelper;
 import app.com.pio.features.monuments.MonumentManager;
 import app.com.pio.ui.monuments.citydetail.CityDetailActivity;
 import butterknife.ButterKnife;
@@ -39,21 +40,15 @@ public class MonumentsFragment extends Fragment {
 
         ((ActionBarActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//        final ArrayList<CityItem> cityItems = new ArrayList<CityItem>();
-//        ArrayList<MonumentItem> bostonItems = new ArrayList<>();
-//        bostonItems.add(new MonumentItem("Old North Church", "Boston, MA", true, R.drawable.old_north_church_bw, R.drawable.old_north_church, null));
-//        bostonItems.add(new MonumentItem("Fenway Park", "Boston, MA", true, R.drawable.fenway_park_bw, R.drawable.fenway_park, null));
-//        bostonItems.add(new MonumentItem("USS Constitution", "Charlestown, MA", false, R.drawable.uss_constitution_bw, R.drawable.uss_constitution, null));
-//        bostonItems.add(new MonumentItem("MIT", "Cambridge, MA", false, R.drawable.mit_bw, R.drawable.mit, null));
-//        cityItems.add(new CityItem("Boston", false, bostonItems));
-
-        vCityList.setAdapter(new CityAdapter(getActivity(), MonumentManager.cities));
+        vCityList.setAdapter(new CityAdapter(getActivity(), MonumentManager.getOrderedCities()));
         vCityList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getActivity(), CityDetailActivity.class);
                 intent.putExtra("city", MonumentManager.cities.get(i));
-                getActivity().startActivity(intent);
+                if (getActivity() != null) {
+                    getActivity().startActivity(intent);
+                }
             }
         });
 
@@ -64,7 +59,8 @@ public class MonumentsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+//        FriendsDBHelper dtemp = new FriendsDBHelper(getActivity());
+//        dtemp.dropTable();
         ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle("Monuments");
     }
 }

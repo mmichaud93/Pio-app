@@ -11,9 +11,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import app.com.pio.features.profiles.ProfileManager;
+import app.com.pio.models.ProfileModel;
 import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.utility.Util;
@@ -25,7 +29,6 @@ public class MonumentManager {
 
     public static ArrayList<CityItem> cities;
     public static ArrayList<GeoFenceModel> geoFences;
-    public static CityItem currentCity;
 
     public static void initializeMonuments(Context context) {
         try {
@@ -63,11 +66,20 @@ public class MonumentManager {
                             monument.getJSONObject("pin").getDouble("radius")));
                 }
 
-                cities.add(new CityItem(city.getString("name"), monuments));
+                cities.add(new CityItem(city.getString("name"), city.getString("province"), city.getString("country"), city.getString("id"), monuments, city.getJSONObject("stats").getDouble("area")));
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String getCityIdFromName(String name, String province, String countryName) {
+        for (CityItem cityItem : cities) {
+            if (cityItem.getName().equals(name) && cityItem.getProvince().equals(province) && cityItem.getCountry().equals(countryName)) {
+                return cityItem.getId();
+            }
+        }
+        return null;
     }
 
     public static int getMonumentImage(String monument) {
@@ -79,7 +91,6 @@ public class MonumentManager {
                 }
             }
         }
-
         return -1;
     }
 
@@ -97,4 +108,21 @@ public class MonumentManager {
         }
         return null;
     }
+
+    public static ArrayList<CityItem> getOrderedCities() {
+        if (cities.size() == 0) {
+            return null;
+        }
+
+        Collections.sort(cities, new Comparator<CityItem>() {
+            @Override
+            public int compare(CityItem item1, CityItem item2) {
+                return ProfileManager.activeProfile.getPointCounts(item1.getId())
+                        - ProfileManager.activeProfile.getPointCounts(item2.getId());
+            }
+        });
+
+        return cities;
+    }
+
 }

@@ -3,10 +3,7 @@ package app.com.pio.ui.map;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PointF;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -156,7 +153,7 @@ public class RecordUtil {
             DataMap dataMap = new DataMap();
             dataMap.putString("xp", ""+RecordUtil.getGainedXP());
             dataMap.putString("time", ""+System.currentTimeMillis());
-            new SendToDataLayerThread("/pio", dataMap, googleClient).start();
+            //new SendToDataLayerThread("/pio", dataMap, googleClient).start();
         }
     }
 

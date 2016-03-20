@@ -16,7 +16,6 @@ public class PrefUtil {
     public static final String PREFS_LOGIN_TYPE_KEY = "TYPE";
     public static final String PREFS_LOGIN_EMAIL_KEY = "EMAIL";
     public static final String PREFS_LOGIN_PASSWORD_KEY = "PASSWORD";
-    public static final String PREFS_FACEBOOK_TOKEN = "FB_TOKEN";
 
     public static final String PREFS_STATS_AREA_KEY = "AREA";
     public static final String PREFS_STATS_TIME_KEY = "TIME";

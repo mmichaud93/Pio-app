@@ -112,7 +112,18 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
+        if (!isInLogin) {
+            pushProfileData();
+        }
+
         updatePlayerViews();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        ProfileManager.saveActiveProfile(this);
     }
 
     @Override
@@ -162,16 +173,7 @@ public class MainActivity extends ActionBarActivity {
                             } else {
                                 // the profile item on the server is out of data and we need to push the local copy to the server,
                                 // this will happen a very large majority of the time
-                                PioApiController.pushUser(ProfileManager.activeProfile, new Callback<PioApiResponse>() {
-                                    @Override
-                                    public void success(PioApiResponse pioApiResponse, Response response) {
-                                    }
-
-                                    @Override
-                                    public void failure(RetrofitError error) {
-                                        // fail quietly because we can just push this later, no biggie
-                                    }
-                                });
+                                pushProfileData();
                             }
                         }
                     }
@@ -201,6 +203,19 @@ public class MainActivity extends ActionBarActivity {
                             (int) (mainLevelBarParent.getWidth() * Util.getExcessXP(ProfileManager.activeProfile.getXp())),
                             (int) Util.dpToPx(12, this)));
         }
+    }
+
+    public void pushProfileData() {
+        PioApiController.pushUser(ProfileManager.activeProfile, new Callback<PioApiResponse>() {
+            @Override
+            public void success(PioApiResponse pioApiResponse, Response response) {
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                // fail quietly because we can just push this later, no biggie
+            }
+        });
     }
 
     @Override

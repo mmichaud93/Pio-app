@@ -7,6 +7,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,24 +16,21 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.Wearable;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Locale;
 
 import app.com.pio.R;
 import app.com.pio.database.MVDatabase;
 import app.com.pio.features.monuments.MonumentManager;
 import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.ui.main.MainActivity;
-import app.com.pio.ui.map.MaskTileProvider;
 import app.com.pio.ui.map.RecordUtil;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.utility.Util;
-import app.com.pio.wear.SendToDataLayerThread;
 
 /**
  * Created by mmichaud on 6/14/15.
@@ -47,6 +46,9 @@ public class LocationUpdateService extends Service {
     public static String AREA_KEY = "area";
     public static String SESSION_KEY = "session";
 
+    Geocoder geocoder;
+    long getLocationTime = 0;
+
     DecimalFormat areaFormat = new DecimalFormat("#.###");
 
     Location previousLocation;
@@ -56,6 +58,7 @@ public class LocationUpdateService extends Service {
 
         if (!started) {
             started = true;
+            geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
             NotificationManager notificationManager = (NotificationManager) getApplicationContext()
                     .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -186,7 +189,6 @@ public class LocationUpdateService extends Service {
         MonumentItem monumentItem = MonumentManager.isInGeoFence(latLng);
         if(monumentItem != null) {
             // unlocked a monument
-            Log.d("PIO", "[LocationUpdateService] unlocked monument "+monumentItem.getName());
             monumentItem.setIsUnlocked(true);
             ProfileManager.activeProfile.addMonument(monumentItem.getId());
             ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + monumentItem.getXpValue());
@@ -200,6 +202,23 @@ public class LocationUpdateService extends Service {
             RecordUtil.recordPoint(uncoveredArea);
             ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + 1);
             kiloSquared += uncoveredArea;
+
+            List<Address> addresses;
+
+            if (getLocationTime < System.currentTimeMillis()) {
+                try {
+                    addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                    if (addresses.size() > 0) {
+                        String city = addresses.get(0).getLocality(); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                        String province = addresses.get(0).getAdminArea();
+                        String countryName = addresses.get(0).getCountryName();
+                        ProfileManager.activeProfile.addCityPoint(city, province, countryName);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    getLocationTime = System.currentTimeMillis() + 15000;
+                }
+            }
             NotificationManager notificationManager = (NotificationManager) getApplicationContext()
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(NOTIFICATION_ID, buildNotification());

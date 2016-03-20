@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import app.com.pio.models.ProfileModel;
+import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.utility.PrefUtil;
 
 /**
@@ -19,11 +20,19 @@ public class ProfileManager {
     public static boolean loadActiveProfile(Context context) {
         ProfileManager.context = context;
 
-        Set<String> set = PrefUtil.getPrefSet(context, "PROFILE_MONUMENTS", null);
-        if(set == null) {
-            set  = new HashSet<String>();
+        Set<String> monumentsSet = PrefUtil.getPrefSet(context, "PROFILE_MONUMENTS", new HashSet<String>());
+        ArrayList<String> monuments = new ArrayList<String>(monumentsSet);
+
+
+        Set<String> cityIdsAndCountsSet = PrefUtil.getPrefSet(context, "PROFILE_CITY_POINTS", new HashSet<String>());
+        ArrayList<String> cityIdsAndCounts = new ArrayList<>(cityIdsAndCountsSet);
+        ArrayList<ProfileModel.StatsModel> stats = new ArrayList<>();
+        for (String string : cityIdsAndCounts) {
+            String[] splitString = string.split(":");
+            if (splitString.length > 1 && splitString[0] != null && splitString[1] != null) {
+                stats.add(new ProfileModel.StatsModel(splitString[0], Integer.parseInt(splitString[1])));
+            }
         }
-        ArrayList<String> monuments = new ArrayList<String>(set);
 
         activeProfile = new ProfileModel(
                 PrefUtil.getPref(context, "PROFILE_NAME", null),
@@ -32,6 +41,7 @@ public class ProfileManager {
                 PrefUtil.getPref(context, "PROFILE_FACEBOOK_USER_ID", null),
                 PrefUtil.getPref(context, "PROFILE_IMAGE", null),
                 PrefUtil.getPref(context, "PROFILE_PREMIUM", false),
+                stats,
                 monuments,
                 PrefUtil.getPref(context, "PROFILE_XP", 0),
                 PrefUtil.getPref(context, "PROFILE_CREATED_AT", 0l),
@@ -60,6 +70,7 @@ public class ProfileManager {
         PrefUtil.savePref(context, "PROFILE_IMAGE", activeProfile.getImage());
         PrefUtil.savePref(context, "PROFILE_PREMIUM", activeProfile.isPremium());
         PrefUtil.savePref(context, "PROFILE_MONUMENTS", new HashSet<String>(activeProfile.getMonuments()));
+        PrefUtil.savePref(context, "PROFILE_CITY_POINTS", new HashSet<String>(activeProfile.getCityIdsAndCounts()));
         PrefUtil.savePref(context, "PROFILE_XP", activeProfile.getXp());
         PrefUtil.savePref(context, "PROFILE_CREATED_AT", activeProfile.getCreatedAt());
         PrefUtil.savePref(context, "PROFILE_LAST_UPDATED", activeProfile.getLastUpdated());

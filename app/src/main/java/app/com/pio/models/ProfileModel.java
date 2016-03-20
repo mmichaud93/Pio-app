@@ -7,7 +7,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+import app.com.pio.features.monuments.MonumentManager;
 import app.com.pio.features.profiles.ProfileManager;
+import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.utility.PrefUtil;
 
 /**
@@ -35,6 +37,9 @@ public class ProfileModel {
     @SerializedName("premium")
     boolean premium;
     @Expose
+    @SerializedName("stats")
+    ArrayList<StatsModel> stats;
+    @Expose
     @SerializedName("monuments")
     ArrayList<String> monuments;
     @Expose
@@ -47,26 +52,28 @@ public class ProfileModel {
     @SerializedName("lastUpdated")
     long lastUpdated;
 
-    public ProfileModel(String name, String email, String pass, FacebookPart facebook, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
+    public ProfileModel(String name, String email, String pass, FacebookPart facebook, String image, boolean premium, ArrayList<StatsModel> stats, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
         this.name = name;
         this.email = email;
         this.pass = pass;
         this.facebook = facebook;
         this.image = image;
         this.premium = premium;
+        this.stats = stats;
         this.monuments = monuments;
         this.xp = xp;
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
     }
 
-    public ProfileModel(String name, String email, String pass, String facebookUserId, String image, boolean premium, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
+    public ProfileModel(String name, String email, String pass, String facebookUserId, String image, boolean premium, ArrayList<StatsModel> stats, ArrayList<String> monuments, int xp, long createdAt, long lastUpdated) {
         this.name = name;
         this.email = email;
         this.pass = pass;
         this.facebook = new FacebookPart(facebookUserId);
         this.image = image;
         this.premium = premium;
+        this.stats = stats;
         this.monuments = monuments;
         this.xp = xp;
         this.createdAt = createdAt;
@@ -139,6 +146,14 @@ public class ProfileModel {
         return monuments;
     }
 
+    public String getMonumentsString() {
+        String monumentsString = "";
+        for (String m : monuments) {
+            monumentsString += m + ", ";
+        }
+        return monumentsString;
+    }
+
     public void setMonuments(ArrayList<String> monuments) {
         this.monuments = monuments;
         saveProfile();
@@ -177,6 +192,43 @@ public class ProfileModel {
         this.lastUpdated = lastUpdated;
     }
 
+    public ArrayList<String> getCityIdsAndCounts() {
+        ArrayList<String> cityIds = new ArrayList<>();
+        for (StatsModel cityStats : stats) {
+            cityIds.add(cityStats.getCityId()+":"+cityStats.getPointCount());
+        }
+        return cityIds;
+    }
+
+    public int getPointCounts(String cityId) {
+        for(StatsModel statsModel : stats) {
+            if (statsModel != null && statsModel.getCityId() != null){
+                if (statsModel.getCityId().equals(cityId)) {
+                    return statsModel.getPointCount();
+                }
+            }
+        }
+        return 0;
+    }
+
+    public void addCityPoint(String cityName, String provinceName, String countryName) {
+        String id = MonumentManager.getCityIdFromName(cityName, provinceName, countryName);
+        if (id == null && cityName != null && provinceName != null && countryName != null) {
+            id = cityName.toLowerCase().replace(' ', '_')+"_"+provinceName.toLowerCase().replace(' ', '_')+"_"+countryName.toLowerCase().replace(' ', '_');
+        } else {
+            return;
+        }
+        for (StatsModel statsModel : stats) {
+            if (statsModel != null && statsModel.cityId != null) {
+                if (statsModel.cityId.equals(id)) {
+                    statsModel.addPointCount();
+                    return;
+                }
+            }
+        }
+        stats.add(new StatsModel(id, 1));
+    }
+
     public class FacebookPart {
 
         @Expose
@@ -195,4 +247,41 @@ public class ProfileModel {
             this.userId = userId;
         }
     }
+
+    public static class StatsModel {
+        @Expose
+        @SerializedName("city_id")
+        String cityId;
+
+        @Expose
+        @SerializedName("point_count")
+        int pointCount;
+
+        public StatsModel(String cityId, int pointCount) {
+            this.cityId = cityId;
+            this.pointCount = pointCount;
+        }
+
+        public String getCityId() {
+            return cityId;
+        }
+
+        public void setCityId(String cityId) {
+            this.cityId = cityId;
+        }
+
+        public int getPointCount() {
+            return pointCount;
+        }
+
+        public void setPointCount(int pointCount) {
+            this.pointCount = pointCount;
+        }
+
+        public void addPointCount() {
+            pointCount++;
+        }
+    }
+
+
 }

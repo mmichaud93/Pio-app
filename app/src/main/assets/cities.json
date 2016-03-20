@@ -2,6 +2,9 @@
   "cities" : [
     {
       "name": "Boston",
+      "province": "Massachusetts",
+      "country": "United States",
+      "id": "boston_massachusetts_united_states",
       "description": "",
       "short_description": "",
       "fun_facts": [
@@ -10,7 +13,7 @@
         "The Boston Common is the oldest public park in the US.",
         "Boston is home to America's first subway, built in 1897.",
         "Leonard Nimoy was born in the West End of Boston.",
-        "The Boston Tea Party is reenacted annualy on December 16th.",
+        "The Boston Tea Party is reenacted annually on December 16th.",
         "The Massachusetts state dog is the Boston Terrier."
       ],
       "stats": {
@@ -70,17 +73,17 @@
           "bitmap_unlocked": "mit"
         }, 
         {
-          "id": "wit_bos",
-          "name": "WIT",
+          "id": "franklin_park_zoo",
+          "name": "Franklin Park Zoo",
           "location": "Boston, MA",
           "pin": {
-            "lat": 42.336123,  
-            "lon": -71.095291,
-            "radius": 100
+            "lat": 42.304150,
+            "lon": -71.088474,
+            "radius": 275
           },
           "xp_value": 2500,
-          "bitmap_locked": "wit_bw",
-          "bitmap_unlocked": "wit"
+          "bitmap_locked": "franklin_park_zoo_bw",
+          "bitmap_unlocked": "franklin_park_zoo"
         }, 
         {
           "id": "ducks_bos",
@@ -98,7 +101,10 @@
       ]
     },
     {
-      "name": "New York City",
+      "name": "New York",
+      "province": "New York",
+      "country": "United States",
+      "id": "new_york_new_york_united_states",
       "description": "",
       "short_description": "",
       "fun_facts": [
@@ -111,15 +117,80 @@
         {
           "id": "empire_state_building_nyc",
           "name": "Empire State Building",
-          "location": "New York City, NY",
+          "location": "New York, NY",
           "pin": {
             "lat": 40.748411,
             "lon": -73.985680,
-            "radius": 150
+            "radius": 100
           },
           "xp_value": 2500,
           "bitmap_locked": "empire_state_building_bw",
           "bitmap_unlocked": "empire_state_building"
+        },
+        {
+          "id": "intrepid_nyc",
+          "name": "USS Intrepid",
+          "location": "New York, NY",
+          "pin": {
+            "lat": 40.765017,
+            "lon": -74.000856,
+            "radius": 175
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "intrepid_bw",
+          "bitmap_unlocked": "intrepid"
+        },
+        {
+          "id": "ellis_island_nyc",
+          "name": "Ellis Island",
+          "location": "New York, NY",
+          "pin": {
+            "lat": 40.698688,
+            "lon": -74.040713,
+            "radius": 240
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "ellis_island_bw",
+          "bitmap_unlocked": "ellis_island"
+        },
+        {
+          "id": "times_square_nyc",
+          "name": "Times Square",
+          "location": "New York, NY",
+          "pin": {
+            "lat": 40.758890,
+            "lon": -73.985094,
+            "radius": 75
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "times_square_bw",
+          "bitmap_unlocked": "times_square"
+        },
+        {
+          "id": "museum_nat_hist_nyc",
+          "name": "Museum of Natural History",
+          "location": "New York, NY",
+          "pin": {
+            "lat": 40.781163,
+            "lon": -73.974180,
+            "radius": 160
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "museum_nat_hist_bw",
+          "bitmap_unlocked": "museum_nat_hist"
+        },
+        {
+          "id": "grand_central_terminal_nyc",
+          "name": "Grand Central Terminal",
+          "location": "New York, NY",
+          "pin": {
+            "lat": 40.752663,
+            "lon": -73.977260,
+            "radius": 80
+          },
+          "xp_value": 2500,
+          "bitmap_locked": "grand_central_terminal_bw",
+          "bitmap_unlocked": "grand_central_terminal"
         }
       ]
     }

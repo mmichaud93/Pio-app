@@ -1,9 +1,7 @@
 package app.com.pio.ui.welcome;
 
 import android.animation.Animator;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,20 +24,15 @@ import android.widget.RelativeLayout;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.plus.Plus;
 
 import app.com.pio.R;
 import app.com.pio.api.ProfileResponse;
 import app.com.pio.api.PioApiController;
 import app.com.pio.api.PioApiResponse;
 import app.com.pio.features.profiles.ProfileManager;
-import app.com.pio.models.ProfileModel;
 import app.com.pio.models.WelcomePageModel;
 import app.com.pio.ui.main.MainActivity;
 import app.com.pio.utility.AnimUtil;
@@ -90,10 +83,6 @@ public class WelcomeFragment extends Fragment {
     @InjectView(R.id.welcome_loading)
     ProgressBar loading;
 
-    private static final int RC_SIGN_IN = 0;
-    private boolean mSignInClicked;
-    private boolean mIntentInProgress;
-
     private boolean isLoggingIn = false;
 
     WelcomePagerAdapter welcomePagerAdapter;
@@ -113,9 +102,15 @@ public class WelcomeFragment extends Fragment {
         ButterKnife.inject(this, root);
 
         welcomePagerAdapter = new WelcomePagerAdapter(this, new WelcomePageModel[]{
-                new WelcomePageModel("Pio tracks your location over time to show where you've been before.", R.drawable.pio_screen_1),
-                new WelcomePageModel("Use Pio to explore new parts of the world.", R.drawable.pio_screen_2),
-                new WelcomePageModel("Unlock achievements and compare stats with your friends.", 0)
+                new WelcomePageModel("Pio uses your location over time to show where you've been before." +
+                        "\n" +
+                        "\n" +
+                        "Hitting the record button before a journey will clear away parts of the map you've been to.", R.drawable.pio_screen_1),
+                new WelcomePageModel("Use Pio to explore new parts of the world." +
+                        "\n" +
+                        "\n" +
+                        "Unlock Monuments at famous sites for extra experience points.", R.drawable.pio_screen_2),
+                new WelcomePageModel("Earn experience points by going where you've never been before and compete with your friends for who is the most adventurous.", 0)
         });
 
         viewPager.setAdapter(welcomePagerAdapter);
@@ -187,6 +182,7 @@ public class WelcomeFragment extends Fragment {
             }
         });
 
+//        signInButtonFacebook.setFragment(this);
         signInButtonFacebook.setReadPermissions("user_friends");
         callbackManager = CallbackManager.Factory.create();
         signInButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -213,7 +209,6 @@ public class WelcomeFragment extends Fragment {
                                                     PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.FACEBOOK.name());
                                                     PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, loginResult.getAccessToken().getUserId());
                                                     PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, PrefUtil.encryptText(loginResult.getAccessToken().getUserId()));
-                                                    PrefUtil.savePref(getActivity(), PrefUtil.PREFS_FACEBOOK_TOKEN, loginResult.getAccessToken().getToken());
 
                                                     ((MainActivity) getActivity()).initRegularApp(null);
                                                     getActivity().supportInvalidateOptionsMenu();
@@ -236,7 +231,6 @@ public class WelcomeFragment extends Fragment {
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.FACEBOOK.name());
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, loginResult.getAccessToken().getUserId());
                                 PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, PrefUtil.encryptText(loginResult.getAccessToken().getUserId()));
-                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_FACEBOOK_TOKEN, loginResult.getAccessToken().getToken());
 
                                 PioApiController.sendNewUser(getActivity(), loginResult.getAccessToken().getUserId(), PrefUtil.encryptText(loginResult.getAccessToken().getUserId()),
                                         PrefUtil.LoginTypes.FACEBOOK.name(), loginResult.getAccessToken().getUserId(), new Callback<PioApiResponse>() {
@@ -274,7 +268,7 @@ public class WelcomeFragment extends Fragment {
 
             @Override
             public void onError(FacebookException exception) {
-                Log.d(TAG, "Could not log in with facebook. onError: "+exception.getMessage());
+                Log.d(TAG, "Could not log in with facebook. onError: " + exception.getMessage());
                 Util.makeCroutonText("Could not sign in with Facebook, please try again later", getActivity());
             }
         });
@@ -309,7 +303,7 @@ public class WelcomeFragment extends Fragment {
                 if (validateText(editable.toString(), ValidateType.EMAIL)) {
                     emailCheckAttempts++;
                     emailEditEmail.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.ic_check_mark), null);
-                    PioApiController.userExists(editable.toString(), new Callback<PioApiResponse>() {
+                    PioApiController.userExists(PrefUtil.encryptText(editable.toString()), new Callback<PioApiResponse>() {
                         @Override
                         public void success(PioApiResponse pioApiResponse, Response response) {
                             isLoggingIn = pioApiResponse.getMsg().equals("true");
@@ -377,43 +371,52 @@ public class WelcomeFragment extends Fragment {
         loading.setVisibility(View.VISIBLE);
         if (isLoggingIn) {
             // check password
-            PioApiController.loginUser(getActivity(), emailEditEmail.getText().toString(),
-                    emailEditPassword.getText().toString(), new Callback<ProfileResponse>() {
-                        @Override
-                        public void success(ProfileResponse profileResponse, Response response) {
-                            loading.setVisibility(View.GONE);
-                            if (profileResponse.getMsg().equals("true")) {
-                                // login success
-                                // TODO: I dont know what else we need to do here
-                                ProfileManager.activeProfile = profileResponse.getProfile();
-                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
-                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
-                                PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
+            PioApiController.loginUser(getActivity(),
+                    PrefUtil.encryptText(emailEditEmail.getText().toString()),
+                    PrefUtil.encryptText(emailEditPassword.getText().toString()),
+                            new Callback<ProfileResponse>() {
+                                @Override
+                                public void success(ProfileResponse profileResponse, Response response) {
+                                    loading.setVisibility(View.GONE);
+                                    if (profileResponse.getMsg().equals("true")) {
+                                        // login success
+                                        // TODO: I dont know what else we need to do here
+                                        ProfileManager.activeProfile = profileResponse.getProfile();
+                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
+                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY,
+                                                PrefUtil.encryptText(emailEditEmail.getText().toString()));
+                                        PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY,
+                                                PrefUtil.encryptText(emailEditPassword.getText().toString()));
 
-                                ((MainActivity) getActivity()).initRegularApp(null);
-                                getActivity().supportInvalidateOptionsMenu();
-                            } else {
-                                // login failure
-                                Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
-                            }
-                        }
+                                        ((MainActivity) getActivity()).initRegularApp(null);
+                                        getActivity().supportInvalidateOptionsMenu();
+                                    } else {
+                                        // login failure
+                                        Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+                                    }
+                                }
 
-                        @Override
-                        public void failure(RetrofitError error) {
-                            // login failure
-                            loading.setVisibility(View.GONE);
-                            Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
-                        }
-                    });
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    // login failure
+                                    loading.setVisibility(View.GONE);
+                                    Util.makeCroutonText("Could not sign in user, check email/password", getActivity());
+                                }
+                            });
         } else {
             // new user
 
             PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_TYPE_KEY, PrefUtil.LoginTypes.EMAIL.name());
-            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY, emailEditEmail.getText().toString());
-            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY, emailEditPassword.getText().toString());
+            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_EMAIL_KEY,
+                    PrefUtil.encryptText(emailEditEmail.getText().toString()));
+            PrefUtil.savePref(getActivity(), PrefUtil.PREFS_LOGIN_PASSWORD_KEY,
+                    PrefUtil.encryptText(emailEditPassword.getText().toString()));
 
-            PioApiController.sendNewUser(getActivity(), emailEditEmail.getText().toString(),
-                    emailEditPassword.getText().toString(), PrefUtil.LoginTypes.EMAIL.name(), null, new Callback<PioApiResponse>() {
+            PioApiController.sendNewUser(getActivity(),
+                    PrefUtil.encryptText(emailEditEmail.getText().toString()),
+                    PrefUtil.encryptText(emailEditPassword.getText().toString()),
+                    PrefUtil.LoginTypes.EMAIL.name(), null,
+                    new Callback<PioApiResponse>() {
                         @Override
                         public void success(PioApiResponse pioApiResponse, Response response) {
                             loading.setVisibility(View.GONE);

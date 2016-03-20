@@ -7,9 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import app.com.pio.R;
+import app.com.pio.features.profiles.ProfileManager;
 import app.com.pio.ui.main.drawer.DrawerItem;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -18,6 +20,8 @@ import butterknife.InjectView;
  * Created by matthewmichaud on 1/17/15.
  */
 public class CityAdapter extends ArrayAdapter<CityItem> {
+
+    DecimalFormat areaFormat = new DecimalFormat("#.###");
 
     public CityAdapter(Context context, List<CityItem> objects) {
         super(context, R.layout.adapter_city_item, objects);
@@ -42,6 +46,10 @@ public class CityAdapter extends ArrayAdapter<CityItem> {
         }
 
         viewHolder.vCityName.setText(item.getName());
+        int areaPoints = ProfileManager.activeProfile.getPointCounts(item.getId());
+        viewHolder.vCityAreaExplored.setText("~"+areaFormat.format(
+                (areaPoints * CityItem.AREA_FOR_EACH_POINT_KMSQ)
+                / item.getCityStats().getArea()) + "% explored");
 
         return convertView;
     }
@@ -49,6 +57,8 @@ public class CityAdapter extends ArrayAdapter<CityItem> {
     static class ViewHolder {
         @InjectView(R.id.city_item_name)
         TextView vCityName;
+        @InjectView(R.id.city_item_area_explored)
+        TextView vCityAreaExplored;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

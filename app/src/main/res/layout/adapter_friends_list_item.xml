@@ -12,8 +12,7 @@
         <ImageView
             android:id="@+id/friends_list_profile_image"
             android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@color/app_primary_dark"/>
+            android:layout_height="56dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -69,14 +68,16 @@
                         android:id="@+id/friends_list_level_bar"
                         android:layout_width="0dp"
                         android:layout_height="12dp"
-                        android:background="@drawable/level_bar_background"/>
+                        android:background="@drawable/level_bar_friends_background"/>
                 </FrameLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
     <RelativeLayout
+        android:id="@+id/friends_list_monuments_parent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
         <TextView
             android:id="@+id/friends_list_monuments_none"
             android:layout_width="wrap_content"
@@ -85,17 +86,19 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
+            android:visibility="gone"
             android:gravity="center"
             android:textSize="18sp"
             android:textColor="@color/text_color_gray"
-            android:text="No monuments have been unlocked."
-            android:visibility="gone"/>
+            android:text="No monuments have been unlocked."/>
         <app.com.pio.ui.FlowLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:flowlayout="http://schemas.android.com/apk/res/si.solarb.flowlayout"
             android:id="@+id/friends_list_monuments_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone"
             android:gravity="start|top">
             <View
                 android:layout_width="wrap_content"
@@ -104,13 +107,5 @@
                 android:layout_gravity="start|top" />
 
         </app.com.pio.ui.FlowLayout>
-        <!--<LinearLayout
-            android:id="@+id/friends_list_monuments_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal"
-            android:visibility="gone"/>-->
     </RelativeLayout>
 </LinearLayout>
