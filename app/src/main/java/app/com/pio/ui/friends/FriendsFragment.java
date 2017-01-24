@@ -194,11 +194,18 @@ public class FriendsFragment extends Fragment {
         }
 
         if (facebookToken != null) {
-            if (friendsListItems.size() != 0) {
+            boolean addYou = true;
+            for (FriendsListItem friendsListItem : friendsListItems) {
+                if (friendsListItem.getUserId().equals(ProfileManager.activeProfile.getFacebook().getUserId())) {
+                    addYou = false;
+                    break;
+                }
+            }
+            if (friendsListItems.size() != 0 && addYou) {
                 friendsListItems.add(new FriendsListItem(
                         "You",
                         AccessToken.getCurrentAccessToken().getUserId(),
-                        "https://graph.facebook.com/" + AccessToken.getCurrentAccessToken().getUserId() + "/picture?type=large",
+                        "https://graph.facebook.com/" + AccessToken.getCurrentAccessToken().getUserId() + "/picture?type=small",
                         ProfileManager.activeProfile.getMonumentsString(),
                         ProfileManager.activeProfile.getXp()));
             }
@@ -220,7 +227,7 @@ public class FriendsFragment extends Fragment {
                                     final FriendsListItem friendsListItem = new FriendsListItem(
                                             objects.getJSONObject(i).getString("name"),
                                             objects.getJSONObject(i).getString("id"),
-                                            "https://graph.facebook.com/" + objects.getJSONObject(i).getString("id") + "/picture?type=large",
+                                            "https://graph.facebook.com/" + objects.getJSONObject(i).getString("id") + "/picture?type=small",
                                             "",
                                             0);
 
@@ -359,28 +366,25 @@ public class FriendsFragment extends Fragment {
             fbStanding.setVisibility(View.GONE);
             return;
         }
-        // are you number 1?
-        String message = "You are the most experienced explorer out of all of your friends! Keep up the good work!";
-        for (FriendsListItem friendsListItem : friendsListItems) {
-            if (ProfileManager.activeProfile.getXp() < friendsListItem.getXp()) {
-                message = "";
+        int position = -1;
+        for (int i = 0; i < friendsListItems.size(); i++) {
+            if (friendsListItems.get(i).getUserId().equals(ProfileManager.activeProfile.getFacebook().getUserId())) {
+                position = i;
+                break;
             }
         }
-        if (!message.isEmpty()) {
-            fbStandingMessage.setText(message);
-            return;
+        String positionString = "nth";
+        if (position == 0) {
+            positionString = "";
+        } else if (position == 1) {
+            positionString = " 2nd";
+        } else if (position == 2) {
+            positionString = " 3rd";
+        } else {
+            positionString = " "+(position+1)+"th";
         }
-        // are you the last?
-        message = "You are the least experienced explorer out of all of your friends. Try harder.";
-        for (FriendsListItem friendsListItem : friendsListItems) {
-            if (ProfileManager.activeProfile.getXp() > friendsListItem.getXp()) {
-                message = "";
-            }
-        }
-        if (!message.isEmpty()) {
-            fbStandingMessage.setText(message);
-            return;
-        }
+        String message = "You are the"+positionString+" most adventurous player among your friends!";
+        fbStandingMessage.setText(message);
     }
 
     public void updateFriendsListItem(FriendsListItem item) {

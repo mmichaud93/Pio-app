@@ -66,7 +66,15 @@ public class MonumentManager {
                             monument.getJSONObject("pin").getDouble("radius")));
                 }
 
-                cities.add(new CityItem(city.getString("name"), city.getString("province"), city.getString("country"), city.getString("id"), monuments, city.getJSONObject("stats").getDouble("area")));
+                cities.add(new CityItem(
+                        city.getString("name"),
+                        city.getString("province"),
+                        city.getString("country"),
+                        city.getString("id"), monuments,
+                        city.getJSONObject("stats").getDouble("area"),
+                        city.getString("primary_color"),
+                        city.getString("accent_color"),
+                        city.getString("other_accent_color")));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -92,6 +100,17 @@ public class MonumentManager {
             }
         }
         return -1;
+    }
+
+    public static String getCityId(String monumentId) {
+        for (CityItem cityItem : cities) {
+            for (MonumentItem monumentItem : cityItem.getMonumentItems()) {
+                if (monumentItem.getId().equals(monumentId)) {
+                    return cityItem.getId();
+                }
+            }
+        }
+        return null;
     }
 
     public static MonumentItem isInGeoFence(LatLng latLng) {

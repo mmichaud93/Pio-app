@@ -106,7 +106,7 @@ public class MaskTileProvider implements TileProvider {
                         double thisTileHeight = bounds.northeast.latitude - bounds.southwest.latitude;
                         float radius = (float) (radiusConstant * (float) bitmapWidth / thisTileWidth);
                         if(zoom-14 < -1) {
-                            radius*=((zoom-14)*-2);
+                            radius*=((zoom-14)*-1.3);
                         }
                         clearAwayPaint.setShader(new RadialGradient(
                                 (float) ((((point.y - bounds.southwest.longitude) / thisTileWidth) * bitmapWidth)),

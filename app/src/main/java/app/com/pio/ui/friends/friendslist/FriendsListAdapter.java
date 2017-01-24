@@ -18,6 +18,8 @@ import app.com.pio.features.monuments.MonumentManager;
 import app.com.pio.ui.FlowLayout;
 import app.com.pio.ui.friends.FriendsFragment;
 import app.com.pio.utility.Util;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * Created by mmichaud on 3/6/16.
@@ -38,15 +40,7 @@ public class FriendsListAdapter extends ArrayAdapter<FriendsListItem> {
         final ViewHolder viewHolder;
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_friends_list_item, null);
-            viewHolder = new ViewHolder();
-            viewHolder.name = (TextView) convertView.findViewById(R.id.friends_list_name);
-            viewHolder.percent = (TextView) convertView.findViewById(R.id.friends_list_percent);
-            viewHolder.level = (TextView) convertView.findViewById(R.id.friends_list_level);
-            viewHolder.profileImage = (ImageView) convertView.findViewById(R.id.friends_list_profile_image);
-            viewHolder.levelBar = convertView.findViewById(R.id.friends_list_level_bar);
-            viewHolder.levelBarParent = (FrameLayout) convertView.findViewById(R.id.friends_list_level_bar_parent);
-            viewHolder.monumentsNone = (TextView) convertView.findViewById(R.id.friends_list_monuments_none);
-            viewHolder.monumentsListParent = (FlowLayout) convertView.findViewById(R.id.friends_list_monuments_list);
+            viewHolder = new ViewHolder(convertView);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -93,14 +87,26 @@ public class FriendsListAdapter extends ArrayAdapter<FriendsListItem> {
         return convertView;
     }
 
-    private static class ViewHolder {
+    public static class ViewHolder {
+        @InjectView(R.id.friends_list_name)
         TextView name;
+        @InjectView(R.id.friends_list_percent)
         TextView percent;
+        @InjectView(R.id.friends_list_level)
         TextView level;
+        @InjectView(R.id.friends_list_profile_image)
         ImageView profileImage;
+        @InjectView(R.id.friends_list_level_bar)
         View levelBar;
+        @InjectView(R.id.friends_list_level_bar_parent)
         FrameLayout levelBarParent;
+        @InjectView(R.id.friends_list_monuments_none)
         TextView monumentsNone;
+        @InjectView(R.id.friends_list_monuments_list)
         FlowLayout monumentsListParent;
+
+        public ViewHolder(View view) {
+            ButterKnife.inject(this, view);
+        }
     }
 }

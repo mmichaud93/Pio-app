@@ -15,16 +15,23 @@ public class CityItem implements Serializable {
     boolean isCompleted;
     ArrayList<MonumentItem> monumentItems;
     CityStats cityStats;
+    String primaryColor;
+    String accentColor;
+    String otherAccentColor;
+
 
     public static double AREA_FOR_EACH_POINT_KMSQ = 0.00001050708;
 
-    public CityItem(String name, String province, String country, String id, ArrayList<MonumentItem> monumentItems, double area) {
+    public CityItem(String name, String province, String country, String id, ArrayList<MonumentItem> monumentItems, double area, String primaryColor, String accentColor, String otherAccentColor) {
         this.name = name;
         this.province = province;
         this.country = country;
         this.id = id;
         this.monumentItems = monumentItems;
         this.cityStats = new CityStats(area);
+        this.primaryColor = primaryColor;
+        this.accentColor = accentColor;
+        this.otherAccentColor = otherAccentColor;
     }
 
     public String getName() {
@@ -81,6 +88,30 @@ public class CityItem implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getPrimaryColor() {
+        return primaryColor;
+    }
+
+    public void setPrimaryColor(String primaryColor) {
+        this.primaryColor = primaryColor;
+    }
+
+    public String getAccentColor() {
+        return accentColor;
+    }
+
+    public void setAccentColor(String accentColor) {
+        this.accentColor = accentColor;
+    }
+
+    public String getOtherAccentColor() {
+        return otherAccentColor;
+    }
+
+    public void setOtherAccentColor(String otherAccentColor) {
+        this.otherAccentColor = otherAccentColor;
     }
 
     public static class CityStats implements Serializable {

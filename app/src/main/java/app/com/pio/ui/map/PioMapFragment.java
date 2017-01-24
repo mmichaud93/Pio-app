@@ -54,6 +54,7 @@ import app.com.pio.ui.friends.FriendsFragment;
 import app.com.pio.ui.monuments.CityItem;
 import app.com.pio.ui.monuments.MonumentItem;
 import app.com.pio.ui.monuments.MonumentsFragment;
+import app.com.pio.utility.AddressUtil;
 import app.com.pio.utility.AnimUtil;
 import app.com.pio.utility.Util;
 import butterknife.ButterKnife;
@@ -324,7 +325,6 @@ public class PioMapFragment extends Fragment {
     }
 
     LatLng firstLatLng = null;
-    long getLocationTime = 0;
 
     private void setUpMap() {
         if (googleMap != null) {
@@ -336,38 +336,30 @@ public class PioMapFragment extends Fragment {
             googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
-//                    if (firstLatLng == null) {
-//                        firstLatLng = latLng;
-//                        return;
-//                    }
-//                    firstLatLng = new LatLng(latLng.latitude + 0.00125, latLng.longitude+ 0.00125);
-//                    for (int i = 0; i < 500; i++) {
-//                        for (int r = 0; r < 500; r++) {
-//                            if (MVDatabase.storePoint((float) (firstLatLng.latitude + (latLng.latitude - firstLatLng.latitude) / 250 * r)
-//                                    , (float) (firstLatLng.longitude + (latLng.longitude - firstLatLng.longitude) / 250 * i), true)) {
-//                                float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
-//                                RecordUtil.recordPoint(uncoveredArea);
-//                                ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + 1);
+                    if (firstLatLng == null) {
+                        firstLatLng = latLng;
+                        return;
+                    }
+                    firstLatLng = new LatLng(latLng.latitude + 0.00125, latLng.longitude+ 0.00125);
+                    for (int i = 0; i < 500; i++) {
+                        for (int r = 0; r < 500; r++) {
+                            if (MVDatabase.storePoint((float) (firstLatLng.latitude + (latLng.latitude - firstLatLng.latitude) / 250 * r)
+                                    , (float) (firstLatLng.longitude + (latLng.longitude - firstLatLng.longitude) / 250 * i), true)) {
+                                float uncoveredArea = (float) ((8+(Math.random()*2-1))/1000f);
+                                RecordUtil.recordPoint(uncoveredArea);
+                                ProfileManager.activeProfile.setXp(ProfileManager.activeProfile.getXp() + 1);
+
+                                AddressUtil.lookupAddress(latLng, getContext());
+//                                Util.lookupAddress(latLng, getContext(), new Util.AddressLookupCallback() {
+//                                    @Override
+//                                    public void done(String city, String province, String countryName) {
 //
-//                                List<Address> addresses;
-//
-//                                if (getLocationTime < System.currentTimeMillis()) {
-//                                    try {
-//                                        addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-//                                        if (addresses.size() > 0) {
-//                                            String city = addresses.get(0).getLocality(); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-//                                            String province = addresses.get(0).getAdminArea();
-//                                            String countryName = addresses.get(0).getCountryName();
-//                                            ProfileManager.activeProfile.addCityPoint(city, province, countryName);
-//                                        }
-//                                    } catch (IOException e) {
-//                                        e.printStackTrace();
-//                                        getLocationTime = System.currentTimeMillis() + 15000;
+//                                        ProfileManager.activeProfile.addCityPoint(city, province, countryName);
 //                                    }
-//                                }
-//                            }
-//                        }
-//                    }
+//                                });
+                            }
+                        }
+                    }
                     overlay.clearTileCache();
                 }
             });

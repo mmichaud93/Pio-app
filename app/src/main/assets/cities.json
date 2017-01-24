@@ -19,6 +19,9 @@
       "stats": {
         "area": 232.14
       },
+      "primary_color": "#EF9A9A",
+      "accent_color": "#90CAF9",
+      "other_accent_color": "#42A5F5",
       "monuments": [
         {
           "id": "old_north_church_bos",
@@ -113,6 +116,9 @@
       "stats": {
         "area": 1214
       },
+      "primary_color": "#9FA8DA",
+      "accent_color": "#FFCC80",
+      "other_accent_color": "#FFA726",
       "monuments": [
         {
           "id": "empire_state_building_nyc",

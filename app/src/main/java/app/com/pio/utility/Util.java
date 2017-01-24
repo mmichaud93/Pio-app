@@ -2,16 +2,33 @@ package app.com.pio.utility;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.text.TextUtils;
+import android.util.Log;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.com.pio.R;
-import app.com.pio.features.profiles.ProfileManager;
+import app.com.pio.ui.main.MainActivity;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
@@ -27,7 +44,7 @@ public class Util {
     }
 
     public static void makeCroutonText(String text, Activity activity) {
-        if(croutonStyle == null) {
+        if (croutonStyle == null) {
             makeStyle();
         }
         Crouton.makeText(activity, text, croutonStyle, R.id.crouton_handle).show();
@@ -36,17 +53,18 @@ public class Util {
     public static float dpToPx(float dp, Context context) {
         return dp * context.getResources().getDisplayMetrics().density;
     }
+
     public static float pxToDp(float px, Context context) {
         return px / context.getResources().getDisplayMetrics().density;
     }
 
     public static String formatLongToTime(long time) {
-        time/=1000;
+        time /= 1000;
         int hours = (int) (time / 3600);
         int minutes = (int) ((time - hours * 3600) / 60);
         int seconds = (int) (time - minutes * 60 - hours * 3600);
 
-        return (hours < 10 ? hours : hours)+":"+(minutes < 10 ? "0"+minutes : minutes)+":"+(seconds < 10 ? "0"+seconds : ""+seconds);
+        return (hours < 10 ? hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : "" + seconds);
     }
 
     public enum ValidateType {
@@ -66,15 +84,15 @@ public class Util {
 
         Pattern pattern;
         Matcher matcher;
-        if(type == ValidateType.EMAIL) {
+        if (type == ValidateType.EMAIL) {
             pattern = Pattern.compile(EMAIL_PATTERN);
             matcher = pattern.matcher(text);
             return matcher.matches();
-        } else if(type == ValidateType.PASSWORD) {
+        } else if (type == ValidateType.PASSWORD) {
             pattern = Pattern.compile(PASSWORD_PATTERN);
             matcher = pattern.matcher(text);
             return matcher.matches();
-        } else if(type == ValidateType.TEXT) {
+        } else if (type == ValidateType.TEXT) {
             return (text.length() > 0);
         } else {
             return false;
@@ -82,15 +100,14 @@ public class Util {
 
     }
 
-    public static float distanceLatLng(LatLng latLngA, LatLng latLngB)
-    {
+    public static float distanceLatLng(LatLng latLngA, LatLng latLngB) {
         double earthRadius = 3958.75;
-        double latDiff = Math.toRadians(latLngB.latitude-latLngA.latitude);
-        double lngDiff = Math.toRadians(latLngB.longitude-latLngA.longitude);
-        double a = Math.sin(latDiff /2) * Math.sin(latDiff /2) +
+        double latDiff = Math.toRadians(latLngB.latitude - latLngA.latitude);
+        double lngDiff = Math.toRadians(latLngB.longitude - latLngA.longitude);
+        double a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
                 Math.cos(Math.toRadians(latLngA.latitude)) * Math.cos(Math.toRadians(latLngB.latitude)) *
-                        Math.sin(lngDiff /2) * Math.sin(lngDiff /2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        Math.sin(lngDiff / 2) * Math.sin(lngDiff / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = earthRadius * c;
 
         int meterConversion = 1609;
@@ -133,5 +150,22 @@ public class Util {
         }
         int level = (int) Math.floor(levelTotal);
         return levelTotal - level;
+    }
+
+    public interface AddressLookupCallback {
+
+        void done(String city, String province, String countryName);
+    }
+
+    public static void lookupAddress(final LatLng latLng, final Context context, final AddressLookupCallback callback) {
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+            }
+        });
+        thread.start();
     }
 }

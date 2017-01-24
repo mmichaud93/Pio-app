@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import app.com.pio.features.monuments.MonumentManager;
@@ -146,6 +147,18 @@ public class ProfileModel {
         return monuments;
     }
 
+    public ArrayList<String> getMonuments(String cityId) {
+
+        ArrayList<String> cityMonuments = new ArrayList<String>();
+        for (String string: monuments) {
+            if (cityId.equals(MonumentManager.getCityId(string))) {
+                cityMonuments.add(string);
+            }
+        }
+
+        return cityMonuments;
+    }
+
     public String getMonumentsString() {
         String monumentsString = "";
         for (String m : monuments) {
@@ -215,8 +228,6 @@ public class ProfileModel {
         String id = MonumentManager.getCityIdFromName(cityName, provinceName, countryName);
         if (id == null && cityName != null && provinceName != null && countryName != null) {
             id = cityName.toLowerCase().replace(' ', '_')+"_"+provinceName.toLowerCase().replace(' ', '_')+"_"+countryName.toLowerCase().replace(' ', '_');
-        } else {
-            return;
         }
         for (StatsModel statsModel : stats) {
             if (statsModel != null && statsModel.cityId != null) {

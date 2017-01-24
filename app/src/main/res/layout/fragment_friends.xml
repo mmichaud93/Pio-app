@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@color/white">
+              android:background="@color/off_white">
     <FrameLayout
         android:id="@+id/crouton_handle"
         android:layout_width="match_parent"
@@ -47,12 +47,16 @@
             android:id="@+id/friends_fb_standing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:visibility="gone"
             android:orientation="vertical">
             <TextView
                 android:id="@+id/friends_fb_standing_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:elevation="2dp"
+                android:background="@color/white"
                 android:padding="16dp"
                 android:text=""
                 android:textSize="16sp"
@@ -62,7 +66,11 @@
         <ListView
             android:id="@+id/friends_fb_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"/>
     </LinearLayout>
 
     <LinearLayout
